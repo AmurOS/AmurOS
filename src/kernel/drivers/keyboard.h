@@ -42,6 +42,14 @@ void __driver_kb_kb_stop(void) {
 	write_port(0x21 , 0xFF);
 }
 
+void __driver_kb_stopinp(void) {
+	__driver_kb_kbbcur++;
+	__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
+	__driver_kb_endinp = true;
+	__driver_kb_kb_stop();
+	return;
+}
+
 void __driver_kb_keyboard_handler_main(void) {
 	byte status;
 	char keycode;

@@ -10,6 +10,25 @@ static void *__std__malloc(int sz) {
     return mem;
 }
 
+void __std__memcpy(void *dest, void *src, int n)  {
+	char *csrc = (char *)src; 
+	char *cdest = (char *)dest;
+	for (int i=0; i<n; i++) 
+	    cdest[i] = csrc[i]; 
+}
+
+bool __std__strcmp(char *input,char *check)
+{
+    int i,result=true;
+    for(i=0; input[i]!='\0' || check[i]!='\0'; i++) {
+        if(input[i] != check[i]) {
+            result=false;
+            break;
+        }
+    }
+    return result;
+}
+
 char* __std__strcpy(char* destination, const char* source) {
     if (destination == NULL) {
         return NULL;
@@ -111,6 +130,16 @@ void __std__cls() {
 	}
 	__std__vidmem[0]=' ';
 	__std__vidmem[1]=WHITE_TXT;
+}
+
+void __std__goto(int index) {
+	__std__vidmem[index]=__std__vidmem[index];
+	__std__vidmem[index+1]=WHITE_TXT;
+}
+
+void __std__gotoxy(int x, int y) {
+	__std__cursory = y;
+	__std__cursorx = x;
 }
 
 void __std__printf(char *message) {

@@ -5,6 +5,7 @@ global _keyboard_handler
 global _read_port
 global _write_port
 global _load_idt
+global _reboot
 
 extern ___driver_kb_keyboard_handler_main
 
@@ -28,6 +29,16 @@ _load_idt:
 _keyboard_handler:                 
 	call    ___driver_kb_keyboard_handler_main
 	iretd
+
+_reboot:
+WKC:
+    xor al, al
+    in al, 0x64
+    test al, 0x02
+    jnz WKC
+
+    mov al, 0xFC
+    out 0x64, al
 
 section .bss
 resb 8192; 8KB for stack

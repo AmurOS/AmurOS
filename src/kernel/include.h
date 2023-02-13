@@ -8,5 +8,6 @@ void keyboard_handler(void);
 char read_port(bit8 port);
 void write_port(bit8 port, byte data);
 void load_idt(byte32 *idt_ptr);
+void reboot(void);
 #include "std.h"
 #include "drivers/keyboard.h"

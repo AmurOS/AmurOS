@@ -17,7 +17,7 @@ void __std__memcpy(void *dest, void *src, int n)  {
 	    cdest[i] = csrc[i]; 
 }
 
-void __std__sleep(int __std__sleep_time) {
+void __std__sleep(byte32i __std__sleep_time) {
 	while (true) {
 		asm("nop");
 		__std__sleep_time--;

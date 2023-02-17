@@ -17,6 +17,15 @@ void __std__memcpy(void *dest, void *src, int n)  {
 	    cdest[i] = csrc[i]; 
 }
 
+void __std__sleep(int __std__sleep_time) {
+	while (true) {
+		asm("nop");
+		__std__sleep_time--;
+		if (__std__sleep_time <= 0)
+			break;
+	}
+}
+
 bool __std__strcmp(char *input,char *check)
 {
     int i,result=true;

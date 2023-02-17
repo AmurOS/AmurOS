@@ -6,6 +6,7 @@
 #define false 0
 #define bit8 unsigned short int
 #define byte unsigned char
+#define byte32i unsigned int
 #define byte32 unsigned long
 #define byte64 unsigned long long
 

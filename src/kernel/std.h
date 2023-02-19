@@ -184,8 +184,10 @@ void __std__symcol(char color)
 
 void __std__newline()
 {
+	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
 	__std__cursory++;
 	__std__cursorx = 0;
+	i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
 }
 
 void __std__putc(char ch)
@@ -194,6 +196,8 @@ void __std__putc(char ch)
 	if (ch == '\n')
 	{
 		__std__cursory++;
+		__std__cursorx = 0;
+		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
 		return;
 	}
 	__std__vidmem[i] = ch;
@@ -253,29 +257,19 @@ void __std__gotoxy(int x, int y)
 void __std__printf(char *message)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+	int j = 0;
+	char __temp__char = message[j];
 
-	while (*message != 0)
+	while (__temp__char != '\0')
 	{
-		if (*message == '\n')
-		{
-			__std__cursory++;
-			i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
-			*message++;
-			//__std__cursory++;
-		}
-		else
-		{
-			__std__vidmem[i] = *message;
-			*message++;
-			i++;
-
-			__std__vidmem[i] = color;
-			i++;
-			__std__cursorx += BYTES_FOR_EACH_ELEMENT;
-		}
+		__std__putc(__temp__char);
+		j++;
+		__temp__char = message[j];
 	}
 }
- 
+
+
+//WARNING: BAD REALIZATION!
 void __std__printc(char *message, enum colors color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);

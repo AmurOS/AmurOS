@@ -45,7 +45,7 @@ _videomode:
     mov ah,00h
     mov al,13h
     mov ah,0ch
-
+	
 section .bss
 resb 8192; 8KB for stack
 stack_space:

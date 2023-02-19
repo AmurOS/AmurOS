@@ -1,5 +1,5 @@
 #include "include.h"
-//header
+// header
 char *header = "===================================Amur=========================================";
 char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 			 "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -30,27 +30,26 @@ char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 void kmain(void)
 {
 	__std__cls();
-
 	__driver_kb_idt_init();
 	char *str = "";
 	__std__printf(logo);
 	__std__scanf(str);
 	__std__color(31);
-	__std__clsc(31);
+	__std__cls();
 	__std__goto(0);
 	__driver_kb_stopinp();
-	__std__printc(header, 31);
+	__std__printf(header);
 	__std__cursory++;
-	__std__printc("Welcome to AmurOS!", 31);
+	__std__printf("Welcome to AmurOS!");;
 	for (int i = 0;; i++)
 	{
 		if (i != 0)
-			__std__printc("> ", 31);
+			__std__printf(">");
 		__std__scanf(str);
 		if (__std__strcmp(str, "help") == true)
 		{
-			__std__printc("----help list----", 31);
-			__std__printc("\nreboot , cls\nsleep , videomode\ntest\n", 31);
+			__std__printf("\n----help list----");
+			__std__printf("\nreboot , cls\nsleep , videomode\ntest\n");
 		}
 		else if (__std__strcmp(str, "reboot") == true)
 		{
@@ -74,14 +73,14 @@ void kmain(void)
 		}
 		else if (__std__strcmp(str, "test") == true)
 		{
-			__std__printc("\nhello\nworld", 65);
+			__std__printc("\nhello\nworld", 32);
 		}
 		__std__newline();
 		if (__std__cursory > LINES - 1)
 		{
-			__std__clsc(31);
+			__std__cls();
 			__std__cursory = 0;
-			__std__printc(header, 31);
+			__std__printf(header);
 			__std__cursory = 1;
 			__std__cursorx = 0;
 		}

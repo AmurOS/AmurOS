@@ -10,5 +10,8 @@ void write_port(bit8 port, byte data);
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
 void videomode(void);
-#include "std.h"
+#include "colors.h"
+static void *__std__malloc(int sz);
+void __std__putc(char ch);
 #include "drivers/keyboard.h"
+#include "std.h"

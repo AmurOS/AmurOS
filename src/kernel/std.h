@@ -1,10 +1,14 @@
 char *__std__vidmem = (char *)0xb8000;
+
+int __std__strlen(const char *str);
+
 static byte __std__buffmem[1024 * 1024];
 static int __std__next_index = 0;
 enum colors color = 7;
 enum colors __std__color(enum colors c){
 	color = c;
 }
+
 static void *__std__malloc(int sz)
 {
 	void *mem;
@@ -23,7 +27,7 @@ void __std__memcpy(void *dest, void *src, int n)
 		cdest[i] = csrc[i];
 }
 
-void *__std__memset(uint32 *dst, char c, uint32 n)
+void *__std__memset(byte32i *dst, char c, byte32i n)
 {
 	char *temp = ((char *)dst);
 	for (; n != 0; n--)
@@ -75,7 +79,7 @@ int __std__strncmp(const char *s1, const char *s2, int c)
 char *__std__strstr(const char *in, const char *str)
 {
 	char c;
-	uint32 len;
+	byte32i len;
 
 	c = *str++;
 	if (!c)

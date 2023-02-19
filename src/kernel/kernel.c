@@ -1,5 +1,6 @@
 #include "include.h"
 //header
+
 char *header = "===================================Amur=========================================";
 char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 			 "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -40,7 +41,8 @@ void kmain(void)
 	__std__goto(0);
 	__driver_kb_stopinp();
 	__std__printc(header, 31);
-	__std__cursory++;
+	
+	__std__gotoxy(__std__cursorx, __std__cursory+1);
 	__std__printc("Welcome to AmurOS!", 31);
 	for (int i = 0;; i++)
 	{
@@ -49,7 +51,7 @@ void kmain(void)
 		__std__scanf(str);
 		if (__std__strcmp(str, "help") == true)
 		{
-			__std__printc("----help list----", 31);
+			__std__printc("\n\n----help list----", 31);
 			__std__printc("\nreboot , cls\nsleep , videomode\ntest\n", 31);
 		}
 		else if (__std__strcmp(str, "reboot") == true)
@@ -59,10 +61,9 @@ void kmain(void)
 		else if (__std__strcmp(str, "cls"))
 		{
 			__std__cls();
-			__std__cursory = 0;
+			__std__gotoxy(__std__cursorx, 0);
 			__std__printc(header, 31);
-			__std__cursory = 1;
-			__std__cursorx = 0;
+			__std__gotoxy(0, 1);
 		}
 		else if (__std__strcmp(str, "sleep") == true)
 		{
@@ -80,10 +81,9 @@ void kmain(void)
 		if (__std__cursory > LINES - 1)
 		{
 			__std__clsc(31);
-			__std__cursory = 0;
+			__std__gotoxy(__std__cursorx, 0);
 			__std__printc(header, 31);
-			__std__cursory = 1;
-			__std__cursorx = 0;
+			__std__gotoxy(0, 1);
 		}
 	}
 }

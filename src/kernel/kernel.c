@@ -1,7 +1,7 @@
 #include "include.h"
 //header
 
-#define HEADER "=================================Amur========================================="
+#define HEADER "=================================Amur==========================================="
 
 char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 			 "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -41,10 +41,13 @@ void kmain(void)
 	__std__cls();
 	__std__goto(0);
 	__driver_kb_stopinp();
+
+	__std__gotoxy(0, 0);
+	__std__cls();
 	__std__printf(HEADER);
+	__std__gotoxy(0, 1);
 	
-	__std__gotoxy(__std__cursorx, __std__cursory+1);
-	__std__printf("Welcome to AmurOS!");
+	__std__printf("\nWelcome to AmurOS!\n");
 	for (int i = 0;; i++)
 	{
 		if (i != 0)

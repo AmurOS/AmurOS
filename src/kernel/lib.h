@@ -6,10 +6,8 @@
 #define bit8 unsigned short int
 #define byte unsigned char
 #define byte32 unsigned long
+#define byte32i unsigned int
 #define byte64 unsigned long long
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
 
 #define LINES 25
 #define COLUMNS_IN_LINE 80

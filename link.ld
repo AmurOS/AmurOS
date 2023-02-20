@@ -1,8 +1,14 @@
-ENTRY(entry)
-SECTIONS
- {
-   . = 0x100000;
-   .text : { *(.text) }
-   .data : { *(.data) }
-   .bss  : { *(.bss)  }
- }
+ENTRY(start)
+
+SECTIONS {
+    . = 1M;
+
+    .boot :
+    {
+        *(.multiboot_header)
+    }
+
+   	.text : { *(.text) }
+   	.data : { *(.data) }
+   	.bss  : { *(.bss)  }
+}

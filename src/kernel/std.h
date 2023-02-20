@@ -5,7 +5,9 @@ int __std__strlen(const char *str);
 static byte __std__buffmem[1024 * 1024];
 static int __std__next_index = 0;
 enum colors color = 7;
-enum colors __std__color(enum colors c){
+
+enum colors __std__color(enum colors c)
+{
 	color = c;
 }
 
@@ -115,6 +117,21 @@ char *__std__strcpy(char *destination, const char *source)
 	}
 	*destination = '\0';
 	return ptr;
+}
+
+char *__std__strncpy(char *dest, char *src, int n)
+{
+	if ((dest == NULL) && (src == NULL))
+		return NULL;
+	char *start = dest;
+	while (*src && n--)
+	{
+		*dest = *src;
+		dest++;
+		src++;
+	}
+	*dest = '\0';
+	return start;
 }
 
 char *__std__scanf(char *st)
@@ -228,20 +245,6 @@ void __std__cls()
 	__std__vidmem[1] = color;
 }
 
-void __std__clsc(enum colors color)
-{
-	unsigned int i = 0;
-	while (i < (SCREENSIZE))
-	{
-		__std__vidmem[i] = ' ';
-		i++;
-		__std__vidmem[i] = color;
-		i++;
-	}
-	__std__vidmem[0] = ' ';
-	__std__vidmem[1] = color;
-}
-
 void __std__goto(int index)
 {
 	__std__vidmem[index] = __std__vidmem[index];
@@ -268,8 +271,7 @@ void __std__printf(char *message)
 	}
 }
 
-
-//WARNING: BAD REALIZATION!
+// WARNING: BAD REALIZATION!
 void __std__printc(char *message, enum colors color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);

@@ -10,6 +10,7 @@ void write_port(bit8 port, byte data);
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
 void videomode(void);
+void outb(unsigned short port, unsigned char data);
 #include "colors.h"
 static void *__std__malloc(int sz);
 void __std__putc(char ch);

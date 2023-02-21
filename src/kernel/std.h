@@ -11,6 +11,13 @@ enum colors __std__color(enum colors c)
 	color = c;
 }
 
+void __std__cursorPosition(int pos) {
+  outb(COMMAND_PORT, HIGH_BYTE_COMMAND);
+  outb(DATA_PORT, ((pos >> 8) & 0x00FF));
+  outb(COMMAND_PORT, LOW_BYTE_COMMAND);
+  outb(DATA_PORT, pos & 0x00FF);
+}
+
 static void *__std__malloc(int sz)
 {
 	void *mem;

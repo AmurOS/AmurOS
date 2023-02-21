@@ -66,13 +66,14 @@ void __driver_kb_keyboard_handler_main(void) {
 			__driver_kb_kbbcur++;
 			__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
 			__driver_kb_endinp = true;
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur+1);
 			__driver_kb_kb_stop();
 			return;
 		}
 
 		__driver_kb_kbbuffer[__driver_kb_kbbcur] = keyboard_map[(byte) keycode];
 		__driver_kb_kbbcur++;
-
+		__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur+1);
 		__std__putc(keyboard_map[(byte) keycode]);
 	}
 }

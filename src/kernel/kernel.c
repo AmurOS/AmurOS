@@ -1,7 +1,8 @@
 #include "include.h"
+// sysinfo
+#define SYSVER "\nSysName: AmurOS\nversion: 0.0.5e(0.0.6)\nCorp: AmurOS"
 // header
-
-#define HEADER "==================================Amur=========================================="
+#define HEADER "                                      Amur                                      "
 
 char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
              "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -35,7 +36,7 @@ void kmain(void)
     __driver_kb_idt_init();
     char *str = "";
     __std__printf(logo);
-    __std__scanf(str);
+    __std__sleep(0x09FFFFFF);
     __std__color(31);
     __std__cls();
     __std__goto(0);
@@ -43,7 +44,7 @@ void kmain(void)
 
     __std__gotoxy(0, 0);
     __std__cls();
-    __std__printf(HEADER);
+    __std__printc(HEADER,112);
     __std__gotoxy(0, 1);
 
     __std__printf("\nWelcome to AmurOS!\n");
@@ -54,8 +55,8 @@ void kmain(void)
         __std__scanf(str);
         if (__std__strcmp(str, "help") == true)
         {
-            __std__printf("\n\n------help list------");
-            __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n=====================");
+            __std__printc("\n\n>-----help list-----<",112);
+            __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n= sysver            =\n=====================");
         }
         else if (__std__strcmp(str, "reboot") == true)
         {
@@ -65,12 +66,15 @@ void kmain(void)
         {
             __std__gotoxy(0, 0);
             __std__cls();
-            __std__printf(HEADER);
+            __std__printc(HEADER,112);
             __std__gotoxy(0, 1);
         }
         else if (__std__strcmp(str, "sleep") == true)
         {
             __std__sleep(0x10FFFFFF);
+        }
+        else if (__std__strcmp(str,"sysver")){
+            __std__printf(SYSVER);
         }
         else if (__std__strcmp(str, "videomode") == true)
         {
@@ -97,7 +101,7 @@ void kmain(void)
         {
             __std__gotoxy(0, 0);
             __std__cls();
-            __std__printf(HEADER);
+            __std__printc(HEADER,112);
             __std__gotoxy(0, 1);
         }
     }

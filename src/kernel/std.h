@@ -11,6 +11,14 @@ enum colors __std__color(enum colors c)
 	color = c;
 }
 
+void __std__cursorPosition(int pos)
+{
+	write_port(COMMAND_PORT, HIGH_BYTE_COMMAND);
+	write_port(DATA_PORT, ((pos >> 8) & 0x00FF));
+	write_port(COMMAND_PORT, LOW_BYTE_COMMAND);
+	write_port(DATA_PORT, pos & 0x00FF);
+}
+
 static void *__std__malloc(int sz)
 {
 	void *mem;
@@ -39,11 +47,12 @@ void *__std__memset(byte32i *dst, char c, byte32i n)
 
 void __std__sleep(byte32 __std__sleep_time)
 {
+	int microseconds = (__std__sleep_time * 60) / 255;
 	while (true)
 	{
 		asm("nop");
-		__std__sleep_time--;
-		if (__std__sleep_time <= 0)
+		microseconds--;
+		if (microseconds <= 0)
 			break;
 	}
 }

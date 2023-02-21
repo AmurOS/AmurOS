@@ -20,6 +20,11 @@
 #define INTERRUPT_GATE 0x8e
 #define KERNEL_CODE_SEGMENT_OFFSET 0x08
 
+#define COMMAND_PORT 0x3D4
+#define DATA_PORT 0x3D5
+#define HIGH_BYTE_COMMAND 14
+#define LOW_BYTE_COMMAND 15
+
 #define ENTER_KEY_CODE 0x1C
 
 byte keyboard_map[128] =

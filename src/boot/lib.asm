@@ -7,7 +7,6 @@ global _write_port
 global _load_idt
 global _reboot
 global _videomode
-
 extern ___driver_kb_keyboard_handler_main
 
 _read_port:
@@ -42,10 +41,13 @@ WKC:
     out 0x64, al
 
 _videomode:
-    mov ah,00h
+    mov ah,01h
     mov al,13h
     mov ah,0ch
-	
+	mov cx,160
+	mov dx,100
+	mov al,4
+
 section .bss
 resb 8192; 8KB for stack
 stack_space:

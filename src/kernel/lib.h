@@ -1,4 +1,4 @@
-#define NULL 0
+#define NULL '\0'
 #define new(t) malloc(sizeof(t))
 #define bool int
 #define true 1

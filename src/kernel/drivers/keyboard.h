@@ -78,6 +78,27 @@ void __driver_kb_keyboard_handler_main(void)
 			__driver_kb_kb_stop();
 			return;
 		}
+		if (keycode == BACKSPACE_KEY_CODE)
+		{
+			if (__driver_kb_kbbcur != 0)
+			{
+				__driver_kb_kbbcur--;
+				__std__cursorx--;
+				__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
+				__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+				__std__delete();
+			}
+			return;
+		}
+		if (keycode == TAB_KEY_CODE)
+		{
+			__driver_kb_kbbcur +=4;
+			__std__cursorx += 4;
+			__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur--);
+			__std__putc('\0');
+			return;
+		}
 
 		__driver_kb_kbbuffer[__driver_kb_kbbcur] = keyboard_map[(byte)keycode];
 		__driver_kb_kbbcur++;

@@ -1,12 +1,14 @@
 process __shell_process;
 
-void __shell_offset() {
-	__std__cls();
+void __shell_offset()
+{
+    _beep();
+    __std__cls();
     __driver_kb_idt_init();
     char *str = "";
     __std__printf(logo);
-    __std__scanf(str);
-    __std__color(31);
+    __std__sleep(0x10FFFFFF);
+    __std__color(7);
     __std__cls();
     __std__goto(0);
     __driver_kb_stopinp();
@@ -23,22 +25,24 @@ void __shell_offset() {
         __std__scanf(str);
         if (__std__strcmp(str, "help") == true)
         {
-            __std__printc("\n\n>-----help list-----<", 112);
-            __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n= sysver  setcursor =\n= beep              =\n=====================");
+            __std__printf("\n\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator");
+            __std__printc("\n>-----help list-----<", 112);
+            __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n= sysver  setcursor =\n= beep    shutdown  =\n=====================");
         }
         else if (__std__strcmp(str, "reboot") == true)
         {
             reboot();
         }
+        else if (__std__strcmp(str, "shutdown") == true)
+        {
+            shutdown();
+        }
         else if (__std__strcmp(str, "cls"))
         {
-        	__std__gotoxy(0, 0);
-		    __std__cls();
-		    __std__printc(HEADER, 112);
-		    __std__printc(HEADER, 112);
-		    __std__printc(HEADER, 112);
-		    __std__printc(HEADER, 112);
-		    __std__printc(HEADER, 112);
+            __std__gotoxy(0, 0);
+            __std__cls();
+            __std__printc(HEADER, 112);
+            __std__gotoxy(0, 1);
         }
         else if (__std__strcmp(str, "sleep") == true)
         {
@@ -48,13 +52,21 @@ void __shell_offset() {
         {
             __std__printf(SYSVER);
         }
+        else if (__std__strcmp(str, "beep"))
+        {
+            _beep();
+        }
+        else if (__std__strcmp(str, "music"))
+        {
+            music();
+        }
         else if (__std__strcmp(str, "videomode") == true)
         {
             videomode();
         }
         else if (__std__strcmp(str, "test") == true)
         {
-            __std__printc("\nhello\nworld", 32);
+            __std__printc("\nhello\nworld\n", 32);
         }
         else if (__std__strstr(str, "echo "))
         {
@@ -82,14 +94,15 @@ void __shell_offset() {
                 write_port(COMMAND_PORT, 0x0A);
                 write_port(DATA_PORT, 0x20);
             }
-            else{
+            else
+            {
                 write_port(COMMAND_PORT, 0x0A);
                 write_port(DATA_PORT, (read_port(DATA_PORT) & 0xC0) | 0);
                 write_port(COMMAND_PORT, 0x0A);
                 write_port(DATA_PORT, (read_port(DATA_PORT) & 0xC0) | 14);
             }
         }
-        
+
         __std__newline();
         if (__std__cursory > LINES - 1)
         {
@@ -101,6 +114,7 @@ void __shell_offset() {
     }
 }
 
-void __shell_init() {
-	__shell_process.offset = *__shell_offset;
+void __shell_init()
+{
+    __shell_process.offset = *__shell_offset;
 }

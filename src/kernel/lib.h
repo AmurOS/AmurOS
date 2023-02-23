@@ -26,6 +26,8 @@
 #define LOW_BYTE_COMMAND 15
 
 #define ENTER_KEY_CODE 0x1C
+#define BACKSPACE_KEY_CODE 0x0E
+#define TAB_KEY_CODE 0x0F
 
 byte keyboard_map[128] =
 {

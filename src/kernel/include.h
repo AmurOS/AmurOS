@@ -10,6 +10,7 @@ void write_port(bit8 port, byte data);
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
 void videomode(void);
+void shutdown(void);
 #include "colors.h"
 static void *__std__malloc(int sz);
 void __std__putc(char ch);
@@ -18,3 +19,4 @@ void __std__cursorPosition(int pos);
 #include "std.h"
 #include "process.h"
 #include "shell.h"
+#include "sound.h"

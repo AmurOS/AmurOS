@@ -4,11 +4,18 @@ int __std__strlen(const char *str);
 
 static byte __std__buffmem[1024 * 1024];
 static int __std__next_index = 0;
+unsigned long int next = 1;
 enum colors color = 7;
 
 enum colors __std__color(enum colors c)
 {
 	color = c;
+}
+
+int __std__rand(void)
+{
+  next = next * 1103515245;
+  return((unsigned int)(next / 65536) * 2768);
 }
 
 void __std__cursorPosition(int pos)
@@ -230,6 +237,14 @@ void __std__putc(char ch)
 	i++;
 	__std__vidmem[i] = color;
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
+}
+
+void __std__delete()
+{
+	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx--;
+	__std__vidmem[i] = '\0';
+	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
+	__std__cursorx = __std__cursorx-2;
 }
 
 void __std__clsym(int index)

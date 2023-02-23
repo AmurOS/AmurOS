@@ -58,7 +58,7 @@ void __shell_offset()
         }
         else if (__std__strcmp(str, "music"))
         {
-            __driver_audio_music();
+            __std_music();
         }
         else if (__std__strcmp(str, "videomode") == true)
         {

@@ -12,6 +12,39 @@ enum colors __std__color(enum colors c)
 	color = c;
 }
 
+// В лесу родилась Ёлочка
+void __std_music(){
+    __driver_audio_tone(247, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(370, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(329, 0x10FFFFFF);
+    __driver_audio_tone(247, 0x10FFFFFF);
+    __driver_audio_tone(247, 0x10FFFFFF);
+    __driver_audio_tone(247, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(370, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(497, 0x10FFFFFF);
+    __std__sleep(0x15FFFFFF);
+    __driver_audio_tone(497, 0x10FFFFFF);
+    __driver_audio_tone(277, 0x10FFFFFF);
+    __driver_audio_tone(2770, 0x10FFFFFF);
+    __driver_audio_tone(440, 0x10FFFFFF);
+    __driver_audio_tone(440, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(370, 0x10FFFFFF);
+    __driver_audio_tone(329, 0x10FFFFFF);
+    __driver_audio_tone(247, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(370, 0x10FFFFFF);
+    __driver_audio_tone(417, 0x10FFFFFF);
+    __driver_audio_tone(329, 0x10FFFFFF); 
+}
+
 int __std__rand(void)
 {
   next = next * 1103515245;

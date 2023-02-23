@@ -11,8 +11,9 @@ void load_idt(byte32 *idt_ptr);
 void reboot(void);
 void videomode(void);
 void shutdown(void);
-void __driver_audio_music();
+void __std_music();
 void __driver_audio_beeps();
+void __std__sleep(byte32 __std__sleep_time);
 #include "colors.h"
 static void *__std__malloc(int sz);
 void __std__putc(char ch);

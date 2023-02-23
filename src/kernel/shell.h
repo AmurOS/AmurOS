@@ -2,7 +2,7 @@ process __shell_process;
 
 void __shell_offset()
 {
-    _beep();
+    __driver_audio_beeps();
     __std__cls();
     __driver_kb_idt_init();
     char *str = "";
@@ -54,11 +54,11 @@ void __shell_offset()
         }
         else if (__std__strcmp(str, "beep"))
         {
-            _beep();
+            __driver_audio_beeps();
         }
         else if (__std__strcmp(str, "music"))
         {
-            music();
+            __driver_audio_music();
         }
         else if (__std__strcmp(str, "videomode") == true)
         {

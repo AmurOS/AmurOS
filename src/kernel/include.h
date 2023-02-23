@@ -11,12 +11,15 @@ void load_idt(byte32 *idt_ptr);
 void reboot(void);
 void videomode(void);
 void shutdown(void);
+void __driver_audio_music();
+void __driver_audio_beeps();
 #include "colors.h"
 static void *__std__malloc(int sz);
 void __std__putc(char ch);
 void __std__cursorPosition(int pos);
+void __std__delete();
 #include "drivers/keyboard.h"
+#include "drivers/sound.h"
 #include "std.h"
 #include "process.h"
 #include "shell.h"
-#include "sound.h"

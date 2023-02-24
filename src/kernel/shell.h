@@ -7,7 +7,7 @@ void __shell_offset()
     __driver_kb_idt_init();
     char *str = "";
     __std__printf(logo);
-    __std__sleep(0x10FFFFFF);
+    __driver_kb_wait();
     __std__color(7);
     __std__cls();
     __std__goto(0);
@@ -69,10 +69,11 @@ void __shell_offset()
         	__fs_initdisk();
             __fs_writefile("test", 4, "abcd");
             __std__printf("\n");
-            __std__printf(__fs_readfile("test", 4));
+            __std__printf(__fs_readfile("test"));
+            //__fs_readfile("test");
             __fs_writefile("test", 4, "efgk");
             __std__printf("\n");
-            __std__printf(__fs_readfile("test", 4));
+            __std__printf(__fs_readfile("test"));
         }
         else if (__std__strcmp(str, "test") == true)
         {

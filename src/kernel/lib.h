@@ -1,5 +1,5 @@
 #define NULL '\0'
-#define new(t) malloc(sizeof(t))
+//#define new(t) __std__malloc(sizeof(t))
 #define bool int
 #define true 1
 #define false 0
@@ -68,3 +68,15 @@ byte keyboard_map[128] =
     0,	/* F12 Key */
     0,	/* All other keys are undefined */
 };
+
+byte32i b8atb32(byte *arr) {
+    return (byte32i)arr[0] << 24 | (byte32i)arr[1] << 16 | (byte32i)arr[2] << 8 | (byte32i)arr[3];
+}
+
+bool arraycmp(byte *f, byte *s, byte32i size) {
+    for (byte32i i = 0; i < size; i++) {
+        if (f[i] != s[i])
+            return false;
+    }
+    return true;
+}

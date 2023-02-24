@@ -25,17 +25,24 @@ void __fs_writes(int start, int size, byte *mem) {
 
 void __fs_newfile(char *name, int size, byte *mem) {
 	addItem(__fs_files, name, __fs_fpointer);
-	__fs_writes(__fs_fpointer, size, mem);
+	byte32i usize = (unsigned)size;
+	__fs_writes(__fs_fpointer, 4, (byte*)&usize);
+	__fs_writes(__fs_fpointer+4, size, mem);
 }
 
 void __fs_writefile(char *name, int size, byte *mem) {
 	if (getItem(__fs_files, name) == NULL) {
 		__fs_newfile(name, size, mem);
 	}
-	__fs_writes((int)getItem(__fs_files, name), size, mem);
+	byte32i usize = (unsigned)size;
+	int offset = (int)getItem(__fs_files, name);
+	__fs_writes(offset, 4, (byte*)&usize);
+	__fs_writes(offset+4, size, mem);
 }
 
-char *__fs_readfile(char *name, int size) {
-	int offset = (int)getItem(__fs_files, name);
-	return __fs_reads(offset, size);
+char *__fs_readfile(char *name) {
+	int val = (int)getItem(__fs_files, name);
+	byte *size = __fs_reads(val, 4);
+	byte *nsize = btarrev(size);
+	return __fs_reads(val+4, b8ati(size));
 }

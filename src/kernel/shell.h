@@ -62,7 +62,17 @@ void __shell_offset()
         }
         else if (__std__strcmp(str, "videomode") == true)
         {
-            videomode();
+        	
+        }
+        else if (__std__strcmp(str, "testfs") == true)
+        {
+        	__fs_initdisk();
+            __fs_writefile("test", 4, "abcd");
+            __std__printf("\n");
+            __std__printf(__fs_readfile("test", 4));
+            __fs_writefile("test", 4, "efgk");
+            __std__printf("\n");
+            __std__printf(__fs_readfile("test", 4));
         }
         else if (__std__strcmp(str, "test") == true)
         {

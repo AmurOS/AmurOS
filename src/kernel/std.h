@@ -59,7 +59,7 @@ void __std__cursorPosition(int pos)
 	write_port(DATA_PORT, pos & 0x00FF);
 }
 
-static void *__std__malloc(int sz)
+static void *__std__malloc(unsigned int sz) 
 {
 	void *mem;
 	if (sizeof __std__buffmem - __std__next_index < sz)
@@ -67,6 +67,11 @@ static void *__std__malloc(int sz)
 	mem = &__std__buffmem[__std__next_index];
 	__std__next_index += sz;
 	return mem;
+}
+
+static void __std__free(void **ptr) 
+{
+	*ptr = __std__malloc(0);
 }
 
 void __std__memcpy(void *dest, void *src, int n)

@@ -70,7 +70,12 @@ byte keyboard_map[128] =
 };
 
 byte32i b8atb32(byte *arr) {
-    return (byte32i)arr[0] << 24 | (byte32i)arr[1] << 16 | (byte32i)arr[2] << 8 | (byte32i)arr[3];
+  return (byte32i)arr[0] << 24 | (byte32i)arr[1] << 16 | (byte32i)arr[2] << 8 | (byte32i)arr[3];
+}
+
+
+int b8ati(byte *arr) {
+  return (int)(arr[0] << 24 | arr[1] << 16 | arr[2] << 8 | arr[3]);
 }
 
 bool arraycmp(byte *f, byte *s, byte32i size) {
@@ -79,4 +84,17 @@ bool arraycmp(byte *f, byte *s, byte32i size) {
             return false;
     }
     return true;
+}
+
+byte *btarrev(byte *arr)
+{
+  byte *narr = arr;
+  int n = sizeof(narr) / sizeof(*narr);
+
+  for (int i = 0; i < n / 2; i++) {
+      int temp = narr[n - i - 1];
+      narr[n - i - 1] = narr[i];
+      narr[i] = temp;
+  }
+  return narr;
 }

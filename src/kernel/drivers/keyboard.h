@@ -55,6 +55,20 @@ void __driver_kb_stopinp(void)
 	return;
 }
 
+void __driver_kb_wait() {
+	
+	for(;;) {
+		write_port(0x20, 0x20);
+		byte status = read_port(KEYBOARD_STATUS_PORT);
+		if (status & 0x01)
+		{
+			char keycode = read_port(KEYBOARD_DATA_PORT);
+			if (keycode < 0 || keycode == ENTER_KEY_CODE)
+				return;
+		}
+	}
+}
+
 void __driver_kb_keyboard_handler_main(void)
 {
 	byte status;

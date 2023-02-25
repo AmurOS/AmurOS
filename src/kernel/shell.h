@@ -12,61 +12,91 @@ void __shell_offset()
     __std__cls();
     __std__goto(0);
     __driver_kb_stopinp();
+    __fs_initdisk();
 
     __std__gotoxy(0, 0);
     __std__cls();
     __std__printc(HEADER, 112);
     __std__gotoxy(0, 1);
     __std__printf("\nWelcome to AmurOS!\n");
+    __std__printf("Write 'help' for list commands\n");
     for (int i = 0;; i++)
     {
         if (i != 0)
             __std__printf("> ");
         __std__scanf(str);
-        if (__std__strcmp(str, "help") == true)
+        if (__std__strcmp(str, "help") || __std__strcmp(str, "HELP"))
         {
             __std__printf("\n\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator");
             __std__printc("\n>-----help list-----<", 112);
             __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n= sysver  setcursor =\n= beep    shutdown  =\n=====================");
         }
-        else if (__std__strcmp(str, "reboot") == true)
+        else if (__std__strcmp(str, "reboot") || __std__strcmp(str, "REBOOT"))
         {
             reboot();
         }
-        else if (__std__strcmp(str, "shutdown") == true)
+        else if (__std__strcmp(str, "shutdown") || __std__strcmp(str, "SHUTDOWN"))
         {
             shutdown();
         }
-        else if (__std__strcmp(str, "cls"))
+        else if (__std__strcmp(str, "cls") || __std__strcmp(str, "CLS"))
         {
             __std__gotoxy(0, 0);
             __std__cls();
             __std__printc(HEADER, 112);
             __std__gotoxy(0, 1);
         }
-        else if (__std__strcmp(str, "sleep") == true)
+        else if (__std__strcmp(str, "sleep") || __std__strcmp(str, "SLEEP"))
         {
             __std__sleep(0x10FFFFFF);
         }
-        else if (__std__strcmp(str, "sysver"))
+        else if (__std__strcmp(str, "sysver") || __std__strcmp(str, "SYSVER"))
         {
             __std__printf(SYSVER);
         }
-        else if (__std__strcmp(str, "beep"))
+        else if (__std__strcmp(str, "beep") || __std__strcmp(str, "BEEP"))
         {
             __driver_audio_beeps();
         }
-        else if (__std__strcmp(str, "music"))
+        else if (__std__strcmp(str, "music") || __std__strcmp(str, "MUSIC"))
         {
             __std_music();
         }
-        else if (__std__strcmp(str, "videomode") == true)
+        else if (__std__strcmp(str, "videomode") || __std__strcmp(str, "VIDEOMODE"))
         {
-        	
         }
-        else if (__std__strcmp(str, "testfs") == true)
+        else if (__std__strstr(str, "wf ") || __std__strstr(str, "WF "))
         {
-        	__fs_initdisk();
+            char *Word, *String;
+            int iWordLen = 0, StringLen = 0;
+            
+            char *firstWord, *otherString;
+            int WordLen = 0, otherStringLen = 0;
+
+            char *space = __std__strstr(str, " ");
+            WordLen = space - str;
+            otherStringLen = __std__strlen(str) - WordLen - 1;
+
+            char *ispace = __std__strstr(__std__strncpy(otherString, &space[1], otherStringLen + 1), " ");
+            iWordLen = ispace - __std__strncpy(otherString, &space[1], otherStringLen + 1);
+            StringLen = __std__strlen(__std__strncpy(otherString, &space[1], otherStringLen + 1)) - iWordLen - 1;
+
+            __fs_writefile(__std__strncpy(otherString, &space[1], otherStringLen + 1), __std__strlen(__std__strncpy(String, &ispace[1], StringLen + 1))+2, __std__strncpy(String, &ispace[1], StringLen + 1));
+        }
+        else if (__std__strstr(str, "rf ") || __std__strstr(str, "RF "))
+        {
+            char *firstWord, *otherString;
+            int WordLen = 0, otherStringLen = 0;
+
+            char *space = __std__strstr(str, " ");
+            WordLen = space - str;
+            otherStringLen = __std__strlen(str) - WordLen - 1;
+
+            __std__newline();
+            __std__printf(__fs_readfile(__std__strncpy(otherString, &space[1], otherStringLen + 1)));
+        }
+        else if (__std__strcmp(str, "testfs") || __std__strcmp(str, "TESTFS"))
+        {
             __fs_writefile("test", 4, "abcd");
             __std__printf("\n");
             __std__printf(__fs_readfile("test"));
@@ -75,11 +105,11 @@ void __shell_offset()
             __std__printf("\n");
             __std__printf(__fs_readfile("test"));
         }
-        else if (__std__strcmp(str, "test") == true)
+        else if (__std__strcmp(str, "test") || __std__strcmp(str, "TEST"))
         {
-            __std__printc("\nhello\nworld\n", 32);
+            __std__printc("\nhello\nworld", 32);
         }
-        else if (__std__strstr(str, "echo "))
+        else if (__std__strstr(str, "echo ") || __std__strcmp(str, "ECHO"))
         {
             char *firstWord, *otherString;
             int WordLen = 0, otherStringLen = 0;
@@ -91,7 +121,7 @@ void __shell_offset()
             __std__newline();
             __std__printf(__std__strncpy(otherString, &space[1], otherStringLen + 1));
         }
-        else if (__std__strstr(str, "setcursor "))
+        else if (__std__strstr(str, "setcursor ") || __std__strcmp(str, "SETCURSOR"))
         {
             char *firstWord, *otherString;
             int WordLen = 0, otherStringLen = 0;

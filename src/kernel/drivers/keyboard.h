@@ -8,7 +8,7 @@ struct IDT_entry
 };
 
 struct IDT_entry __driver_kb_IDT[IDT_SIZE];
-
+bool shift = false;
 void __driver_kb_idt_init(void)
 {
 	byte32 keyboard_address;
@@ -83,6 +83,17 @@ void __driver_kb_keyboard_handler_main(void)
 		if (keycode < 0)
 			return;
 
+		if (keycode == 0x36 || keycode == 0x2A)
+			if (shift == true)
+				shift = false;
+			else if (shift == false)
+				shift = true;
+		if (keycode == 0x3A)
+			if (shift == true)
+				shift = false;
+			else if (shift == false)
+				shift = true;
+
 		if (keycode == ENTER_KEY_CODE)
 		{
 			__driver_kb_kbbcur++;
@@ -106,18 +117,27 @@ void __driver_kb_keyboard_handler_main(void)
 		}
 		if (keycode == TAB_KEY_CODE)
 		{
-			__driver_kb_kbbcur +=4;
+			__driver_kb_kbbcur += 4;
 			__std__cursorx += 4;
 			__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
 			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur--);
 			__std__putc('\0');
 			return;
 		}
-
-		__driver_kb_kbbuffer[__driver_kb_kbbcur] = keyboard_map[(byte)keycode];
-		__driver_kb_kbbcur++;
-		__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
-		__std__putc(keyboard_map[(byte)keycode]);
+		if (shift == true)
+		{
+			__driver_kb_kbbuffer[__driver_kb_kbbcur] = Capskeyboard_map[(byte)keycode];
+			__driver_kb_kbbcur++;
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+			__std__putc(Capskeyboard_map[(byte)keycode]);
+		}
+		else
+		{
+			__driver_kb_kbbuffer[__driver_kb_kbbcur] = keyboard_map[(byte)keycode];
+			__driver_kb_kbbcur++;
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+			__std__putc(keyboard_map[(byte)keycode]);
+		}
 	}
 }
 

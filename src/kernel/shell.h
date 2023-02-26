@@ -43,8 +43,6 @@ void __shell_offset()
         {
             __std__gotoxy(0, 0);
             __std__cls();
-            __std__printc(HEADER, 112);
-            __std__gotoxy(0, 1);
         }
         else if (__std__strcmp(str, "sleep") || __std__strcmp(str, "SLEEP"))
         {
@@ -81,7 +79,7 @@ void __shell_offset()
             iWordLen = ispace - __std__strncpy(otherString, &space[1], otherStringLen + 1);
             StringLen = __std__strlen(__std__strncpy(otherString, &space[1], otherStringLen + 1)) - iWordLen - 1;
 
-            __fs_writefile(__std__strncpy(otherString, &space[1], otherStringLen + 1), __std__strlen(__std__strncpy(String, &ispace[1], StringLen + 1))+2, __std__strncpy(String, &ispace[1], StringLen + 1));
+            __fs_writefile(__std__strncpy(otherString, &space[1], otherStringLen + 1), __std__strlen(__std__strncpy(String, &ispace[1], StringLen + 1)), __std__strncpy(String, &ispace[1], StringLen + 1));
         }
         else if (__std__strstr(str, "rf ") || __std__strstr(str, "RF "))
         {
@@ -152,6 +150,8 @@ void __shell_offset()
             __std__printc(HEADER, 112);
             __std__gotoxy(0, 1);
         }
+        //ini cursor //ини курсор))))))))))))))))))))))))))))))))))
+        __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
     }
 }
 

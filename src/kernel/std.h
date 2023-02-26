@@ -13,42 +13,43 @@ enum colors __std__color(enum colors c)
 }
 
 // В лесу родилась Ёлочка
-void __std_music(){
-    __driver_audio_tone(247, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(370, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(329, 0x10FFFFFF);
-    __driver_audio_tone(247, 0x10FFFFFF);
-    __driver_audio_tone(247, 0x10FFFFFF);
-    __driver_audio_tone(247, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(370, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(497, 0x10FFFFFF);
-    __std__sleep(0x15FFFFFF);
-    __driver_audio_tone(497, 0x10FFFFFF);
-    __driver_audio_tone(277, 0x10FFFFFF);
-    __driver_audio_tone(2770, 0x10FFFFFF);
-    __driver_audio_tone(440, 0x10FFFFFF);
-    __driver_audio_tone(440, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(370, 0x10FFFFFF);
-    __driver_audio_tone(329, 0x10FFFFFF);
-    __driver_audio_tone(247, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(370, 0x10FFFFFF);
-    __driver_audio_tone(417, 0x10FFFFFF);
-    __driver_audio_tone(329, 0x10FFFFFF); 
+void __std_music()
+{
+	__driver_audio_tone(247, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(370, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(329, 0x10FFFFFF);
+	__driver_audio_tone(247, 0x10FFFFFF);
+	__driver_audio_tone(247, 0x10FFFFFF);
+	__driver_audio_tone(247, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(370, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(497, 0x10FFFFFF);
+	__std__sleep(0x15FFFFFF);
+	__driver_audio_tone(497, 0x10FFFFFF);
+	__driver_audio_tone(277, 0x10FFFFFF);
+	__driver_audio_tone(2770, 0x10FFFFFF);
+	__driver_audio_tone(440, 0x10FFFFFF);
+	__driver_audio_tone(440, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(370, 0x10FFFFFF);
+	__driver_audio_tone(329, 0x10FFFFFF);
+	__driver_audio_tone(247, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(370, 0x10FFFFFF);
+	__driver_audio_tone(417, 0x10FFFFFF);
+	__driver_audio_tone(329, 0x10FFFFFF);
 }
 
 int __std__rand(void)
 {
-  next = next * 1103515245;
-  return((unsigned int)(next / 65536) * 2768);
+	next = next * 1103515245;
+	return ((unsigned int)(next / 65536) * 2768);
 }
 
 void __std__cursorPosition(int pos)
@@ -59,7 +60,7 @@ void __std__cursorPosition(int pos)
 	write_port(DATA_PORT, pos & 0x00FF);
 }
 
-static void *__std__malloc(unsigned int sz) 
+static void *__std__malloc(unsigned int sz)
 {
 	void *mem;
 	if (sizeof __std__buffmem - __std__next_index < sz)
@@ -69,7 +70,7 @@ static void *__std__malloc(unsigned int sz)
 	return mem;
 }
 
-static void __std__free(void **ptr) 
+static void __std__free(void **ptr)
 {
 	*ptr = __std__malloc(0);
 }
@@ -276,13 +277,29 @@ void __std__putc(char ch)
 	__std__vidmem[i] = color;
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
 }
+//putc with color
+void __std__putcc(char ch, enum colors color)
+{
+	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
+	if (ch == '\n')
+	{
+		__std__cursory++;
+		__std__cursorx = 0;
+		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+		return;
+	}
+	__std__vidmem[i] = ch;
+	i++;
+	__std__vidmem[i] = color;
+	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
+}
 
 void __std__delete()
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx--;
 	__std__vidmem[i] = '\0';
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
-	__std__cursorx = __std__cursorx-2;
+	__std__cursorx = __std__cursorx - 2;
 }
 
 void __std__clsym(int index)
@@ -337,24 +354,13 @@ void __std__printf(char *message)
 void __std__printc(char *message, enum colors color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+	int j = 0;
+	char __temp__char = message[j];
 
-	while (*message != 0)
+	while (__temp__char != '\0')
 	{
-		if (*message == '\n')
-		{
-			__std__cursory++;
-			i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
-			*message++;
-			//__std__cursory++;
-		}
-		else
-		{
-			__std__vidmem[i] = *message;
-			*message++;
-			i++;
-			__std__vidmem[i] = color;
-			i++;
-			__std__cursorx += BYTES_FOR_EACH_ELEMENT;
-		}
+		__std__putcc(__temp__char,color);
+		j++;
+		__temp__char = message[j];
 	}
 }

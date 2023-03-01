@@ -247,6 +247,37 @@ void __std__itoa(int num, char *number)
 	}
 }
 
+void __std__itoan(char *buf, int base, int d) {
+    char *p = buf;
+    char *p1, *p2;
+    unsigned long ud = d;
+    int divisor = 10;
+
+    if (base == 'd' && d < 0) {
+        *p++ = '-';
+        buf++;
+        ud = -d;
+    } else if (base == 'x')
+        divisor = 16;
+
+    do {
+        int remainder = ud % divisor;
+        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
+    } while (ud /= divisor);
+
+    *p = 0;
+
+    p1 = buf;
+    p2 = p - 1;
+    while (p1 < p2) {
+        char tmp = *p1;
+        *p1 = *p2;
+        *p2 = tmp;
+        p1++;
+        p2--;
+    }
+}
+
 void __std__symcol(char color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
@@ -277,7 +308,7 @@ void __std__putc(char ch)
 	__std__vidmem[i] = color;
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
 }
-//putc with color
+// putc with color
 void __std__putcc(char ch, enum colors color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
@@ -359,8 +390,65 @@ void __std__printc(char *message, enum colors color)
 
 	while (__temp__char != '\0')
 	{
-		__std__putcc(__temp__char,color);
+		__std__putcc(__temp__char, color);
 		j++;
 		__temp__char = message[j];
 	}
+}
+//normal printf
+void __std__printff(const char *format, ...) {
+    char **arg = (char **)&format;
+    int c;
+    char buf[32];
+
+    arg++;
+
+    __std__memset(buf, 0, sizeof(buf));
+    while ((c = *format++) != 0) {
+        if (c != '%')
+            __std__putc(c);
+        else {
+            char *p, *p2;
+            int pad0 = 0, pad = 0;
+
+            c = *format++;
+            if (c == '0') {
+                pad0 = 1;
+                c = *format++;
+            }
+
+            if (c >= '0' && c <= '9') {
+                pad = c - '0';
+                c = *format++;
+            }
+
+            switch (c) {
+                case 'd':
+                case 'u':
+                case 'x':
+                    __std__itoan(buf, c, *((int *)arg++));
+                    p = buf;
+                    goto string;
+                    break;
+
+                case 's':
+                    p = *arg++;
+                    if (!p)
+                        p = "(null)";
+
+                string:
+                    for (p2 = p; *p2; p2++)
+                        ;
+                    for (; p2 < p + pad; p2++)
+                        __std__putc(pad0 ? '0' : ' ');
+                    while (*p)
+                    	__std__putc(*p++);
+                    break;
+
+                default:
+                    __std__putc(*((int *)arg++));
+                    break;
+            }
+        }
+    }
 }

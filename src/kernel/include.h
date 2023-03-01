@@ -33,4 +33,5 @@ void __std__delete();
 #include "dict.h"
 #include "drivers/fs.h"
 #include "process.h"
+#include "gdt.h"
 #include "shell.h"

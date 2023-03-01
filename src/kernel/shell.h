@@ -19,7 +19,12 @@ void __shell_offset()
     __std__printc(HEADER, 112);
     __std__gotoxy(0, 1);
     __std__printf("\nWelcome to AmurOS!\n");
-    __std__printf("Write 'help' for list commands\n");
+    __std__printf("Type 'help' to view the list of commands\n");
+    create_descriptor(0, 0, 0);
+    create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0));
+    create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0));
+    create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3));
+    create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3));
     for (int i = 0;; i++)
     {
         if (i != 0)
@@ -27,9 +32,16 @@ void __shell_offset()
         __std__scanf(str);
         if (__std__strcmp(str, "help") || __std__strcmp(str, "HELP"))
         {
-            __std__printf("\n\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator");
-            __std__printc("\n>-----help list-----<", 112);
-            __std__printf("\n= reboot  cls       =\n= sleep   videomode =\n= test    echo      =\n= sysver  setcursor =\n= beep    shutdown  =\n=====================");
+            __std__printff("\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator%s",SYSVER);
+            __std__printc("\n>--------help list--------<", 112);
+            __std__printf("\n= reboot  cls        music=");
+            __std__printf("\n= sleep   videomode  help =");
+            __std__printf("\n= test    echo            =");
+            __std__printf("\n= sysver  setcursor       =");
+            __std__printf("\n= beep    shutdown        =");
+            __std__printf("\n= rand    wf              =");
+            __std__printf("\n= rf      testfs          =");
+            __std__printf("\n===========================");
         }
         else if (__std__strcmp(str, "reboot") || __std__strcmp(str, "REBOOT"))
         {
@@ -62,12 +74,19 @@ void __shell_offset()
         }
         else if (__std__strcmp(str, "videomode") || __std__strcmp(str, "VIDEOMODE"))
         {
+
+            __graphics_init();
+            __graphics_putpixel(0,0,10);
+            __graphics_putpixel(1,0,10);
+            __graphics_fillrect(20,20,40,40,10);
+            __graphics_line(3,6,46,67,4);
+            __graphics_circle(75,75,10,2);
         }
         else if (__std__strstr(str, "wf ") || __std__strstr(str, "WF "))
         {
             char *Word, *String;
             int iWordLen = 0, StringLen = 0;
-            
+
             char *firstWord, *otherString;
             int WordLen = 0, otherStringLen = 0;
 
@@ -93,6 +112,14 @@ void __shell_offset()
             __std__newline();
             __std__printf(__fs_readfile(__std__strncpy(otherString, &space[1], otherStringLen + 1)));
         }
+        else if (__std__strcmp(str, "test") || __std__strcmp(str, "TEST"))
+        {
+            __std__printc("\nhello\nworld", 32);
+        }
+        else if (__std__strcmp(str, "rand") || __std__strcmp(str, "RAND"))
+        {
+            __std__printff("\n%d", __std__rand());
+        }
         else if (__std__strcmp(str, "testfs") || __std__strcmp(str, "TESTFS"))
         {
             __fs_writefile("test", 4, "abcd");
@@ -102,10 +129,6 @@ void __shell_offset()
             __fs_writefile("test", 4, "efgk");
             __std__printf("\n");
             __std__printf(__fs_readfile("test"));
-        }
-        else if (__std__strcmp(str, "test") || __std__strcmp(str, "TEST"))
-        {
-            __std__printc("\nhello\nworld", 32);
         }
         else if (__std__strstr(str, "echo ") || __std__strcmp(str, "ECHO"))
         {
@@ -150,7 +173,7 @@ void __shell_offset()
             __std__printc(HEADER, 112);
             __std__gotoxy(0, 1);
         }
-        //ini cursor //ини курсор))))))))))))))))))))))))))))))))))
+        // ini cursor //ини курсор))))))))))))))))))))))))))))))))))
         __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
     }
 }

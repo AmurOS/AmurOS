@@ -6,7 +6,6 @@ global _read_port
 global _write_port
 global _load_idt
 global _reboot
-global _videomode
 global _shutdown
 extern ___driver_kb_keyboard_handler_main
 
@@ -40,8 +39,6 @@ WKC:
 
     mov al, 0xFC
     out 0x64, al
-
-_videomode:
 
 _shutdown:
     mov ax, 0x1000

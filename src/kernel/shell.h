@@ -32,7 +32,7 @@ void __shell_offset()
         __std__scanf(str);
         if (__std__strcmp(str, "help") || __std__strcmp(str, "HELP"))
         {
-            __std__printff("\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator%s",SYSVER);
+            __std__printff("\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator%s", SYSVER);
             __std__printc("\n>--------help list--------<", 112);
             __std__printf("\n= reboot  cls        music=");
             __std__printf("\n= sleep   videomode  help =");
@@ -74,13 +74,10 @@ void __shell_offset()
         }
         else if (__std__strcmp(str, "videomode") || __std__strcmp(str, "VIDEOMODE"))
         {
-
-            __graphics_init();
-            __graphics_putpixel(0,0,10);
-            __graphics_putpixel(1,0,10);
-            __graphics_fillrect(20,20,40,40,10);
-            __graphics_line(3,6,46,67,4);
-            __graphics_circle(75,75,10,2);
+            __process_pop();
+            __desktop_init();
+            __process_push(__desktop_process);
+            __start_processes();
         }
         else if (__std__strstr(str, "wf ") || __std__strstr(str, "WF "))
         {

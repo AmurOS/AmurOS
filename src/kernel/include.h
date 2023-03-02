@@ -16,7 +16,6 @@ asm volatile ("outb %%al,%%dx": :"dN"(port), "a"(value));
 }
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
-void videomode(void);
 void shutdown(void);
 void __std_music();
 void __driver_audio_beeps();
@@ -34,4 +33,6 @@ void __std__delete();
 #include "drivers/fs.h"
 #include "process.h"
 #include "gdt.h"
+#include "AGE/plasmaUI.h"
+#include "AGE/desktop.h"
 #include "shell.h"

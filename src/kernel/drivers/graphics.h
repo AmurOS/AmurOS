@@ -46,7 +46,7 @@ void __graphics_line(bit8 x1, bit8 y1, bit8 x2, bit8 y2, byte color) {
     }
 }
 
-void vga_graphics_draw_rect(bit8 x, bit8 y, bit8 width, bit8 height, byte color) {
+void _graphics_draw_rect(bit8 x, bit8 y, bit8 width, bit8 height, byte color) {
     __graphics_line(x, y, x, y + height, color);
     __graphics_line(x, y, x + width, y, color);
     __graphics_line(x + width, y, x + width, y + height, color);

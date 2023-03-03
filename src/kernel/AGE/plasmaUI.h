@@ -1,12 +1,17 @@
-#define RIGHT VGA_MAX_WIDTH
-#define LEFT 0
-#define TOP 0
-#define BOTTOM VGA_MAX_HEIGHT
 #define BITMAP_SIZE 8
 
-void __plasmaUI_Button(int x, int y, int width, int height, char color, char* str){
-    __graphics_fillrect(x,y,width,height,color);
-    __plasmaUI_drawString(x+width/4+__std__strlen(str)/BITMAP_SIZE,y+(height/2-2),WHITE,str);
+typedef struct __plasmaUI_Button{
+    int x;
+    int y;
+    int width;
+    int height;
+    char color;
+    char* str;
+} __plasmaUI_Button;
+
+void __plasmaUI_CreateButton(__plasmaUI_Button button){
+    __graphics_fillrect(button.x,button.y, button.width, button.height, button.color);
+    __plasmaUI_drawString(button.x+button.width/4+__std__strlen(button.str)/BITMAP_SIZE,button.y+(button.height/2-2),WHITE,button.str);
 }
 
 //draw string and font

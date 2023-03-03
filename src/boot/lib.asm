@@ -47,7 +47,6 @@ _shutdown:
     mov ax, 0x5307
     mov bx, 0x0001
     mov cx, 0x0003
-
 section .bss
 resb 8192; 8KB for stack
 stack_space:

@@ -57,5 +57,5 @@ void create_descriptor(byte32i base, byte32i limit, bit8 flag)
     descriptor |= base << 16;         // set base bits 15:0
     descriptor |= limit & 0x0000FFFF; // set limit bits 15:0
 
-    __std__printff("0x%.16llX\n", descriptor);
+    //__std__printff("0x%.16llX\n", descriptor);
 }

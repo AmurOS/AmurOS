@@ -33,7 +33,7 @@ char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void kmain(void)
 {
-    __shell_init();
-    __process_push(__shell_process);
-    __start_processes();
+    __boot_init();
+    __process_push(__boot_process);
+    __start_process(1);
 }

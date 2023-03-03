@@ -24,9 +24,16 @@ void __process_push(process prcs) {
 	__processes[__processes_pointer] = prcs;
 }
 
+void __start_process(int i) {
+	if (__processes[i].id != NULL)
+		__processes[i].offset();
+}
+
 void __start_processes() {
-	for (int i = 0; i < MAXPROCESSES; i++) {
-		if (__processes[i].id != NULL)
-			__processes[i].offset();
+	for (;;) {
+		for (int i = 2; i < MAXPROCESSES; i++) {
+			if (__processes[i].id != NULL)
+				__processes[i].offset();
+		}
 	}
 }

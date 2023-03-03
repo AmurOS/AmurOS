@@ -22,6 +22,12 @@
 #define VGA_MAX_HEIGHT 200
 #define VGA_MAX (VGA_MAX_WIDTH * VGA_MAX_HEIGHT)
 
+void set_sequencer_registers();
+void set_miscellaneous_registers();
+void set_crt_controller_registers();
+void set_attribute_controller_registers();
+void set_graphics_controller_registers();
+
 
 __graphics_putpixel(bit8 x, bit8 y, byte color)
 {

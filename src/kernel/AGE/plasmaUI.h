@@ -428,12 +428,12 @@ void __plasmaUI_drawChar(bit8 x, bit8 y, byte color, char ch) {
     }
 }
 
-void __plasmaUI_drawString(bit8 x, bit8 y, byte color, char *str) {
-    byte32i index = 0;
+void __plasmaUI_drawString(bit8 x, bit8 y, byte color, char *str, int size) {
+    //int index = 0;
 
-    while (str[index]) {
-        __plasmaUI_drawChar(x, y, color, str[index]);
+    for(int i = 0; i < size; i++) {
+        __plasmaUI_drawChar(x, y, color, str[i]);
         x += BITMAP_SIZE;
-        index++;
+        //index++;
     }
 }

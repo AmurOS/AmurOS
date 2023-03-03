@@ -11,8 +11,11 @@ __plasmaUI_Button startbtn;
 void __desktop_offset()
 {
     __graphics_init();
-    __plasmaUI_drawString(WIDTHSCREEN / 2, HEIGHTSCREEN / 2, WHITE01, "AMUROS");
-    __desktop_taskbar();
+    char amuroslabel[] = "AMUROS";
+    //for (;;) {
+        __plasmaUI_drawString(WIDTHSCREEN / 2, HEIGHTSCREEN / 2, WHITE01, amuroslabel, sizeof(amuroslabel));
+        __desktop_taskbar();
+    //}
 }
 
 void __desktop_taskbar()
@@ -25,7 +28,8 @@ void __desktop_taskbar()
     startbtn.color = BLUE01; 
     startbtn.str = " ";
     // draw
-    __plasmaUI_CreateButton(startbtn);
+    //__plasmaUI_CreateButton(startbtn);
+    __graphics_fillrect(LEFT + 2, BOTTOM - height - 2, 10, height, BLUE01);
     __graphics_fillrect(LEFT + 16, BOTTOM - height - 2, WIDTHSCREEN - 20, height, BLUE01);
 }
 

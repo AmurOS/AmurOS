@@ -1,3 +1,4 @@
+volitile static char[SCREENSIZE+1] RAMBUFFER;
 char *__std__vidmem = (char *)0xb8000;
 
 int __std__strlen(const char *str);
@@ -6,6 +7,14 @@ static byte __std__buffmem[1024 * 1024];
 static int __std__next_index = 0;
 unsigned long int next = 1;
 enum colors color = 7;
+
+void __init_ram_buffer() {
+	for (int i = 0; i < SCREENSIZE; i++) {
+		STDRAM[i] = 0x00;
+	}
+	__std__printf("Initialized");
+	__std__newline();
+}
 
 enum colors __std__color(enum colors c)
 {
@@ -281,8 +290,9 @@ void __std__itoan(char *buf, int base, int d) {
 void __std__symcol(char color)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
-	__std__vidmem[i] = color;
+	RAMBUFFER[i] = color;
 	i++;
+	__std__flush();
 }
 
 void __std__newline()
@@ -291,6 +301,12 @@ void __std__newline()
 	__std__cursory++;
 	__std__cursorx = 0;
 	i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+}
+
+void __std__flush() {
+	for (int i = 0; i < SCREENSIZE; i++) {
+		__std__vidmem[i] = RAMBUFFER[i];
+	}
 }
 
 void __std__putc(char ch)
@@ -303,10 +319,11 @@ void __std__putc(char ch)
 		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
 		return;
 	}
-	__std__vidmem[i] = ch;
+	RAMBUFFER[i] = ch;
 	i++;
-	__std__vidmem[i] = color;
+	RAMBUFFER[i] = color;
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
+	__std__flush();
 }
 // putc with color
 void __std__putcc(char ch, enum colors color)
@@ -319,26 +336,29 @@ void __std__putcc(char ch, enum colors color)
 		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
 		return;
 	}
-	__std__vidmem[i] = ch;
+	RAMBUFFER[i] = ch;
 	i++;
-	__std__vidmem[i] = color;
+	RAMBUFFER[i] = color;
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
+	__std__flush();
 }
 
 void __std__delete()
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx--;
-	__std__vidmem[i] = '\0';
+	RAMBUFFER[i] = '\0';
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
 	__std__cursorx = __std__cursorx - 2;
+	__std__flush();
 }
 
 void __std__clsym(int index)
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + index;
-	__std__vidmem[i] = ' ';
+	RAMBUFFER[i] = ' ';
 	i++;
-	__std__vidmem[i] = color;
+	RAMBUFFER[i] = color;
+	__std__flush();
 }
 
 void __std__cls()
@@ -346,19 +366,21 @@ void __std__cls()
 	unsigned int i = 0;
 	while (i < (SCREENSIZE))
 	{
-		__std__vidmem[i] = ' ';
+		RAMBUFFER[i] = ' ';
 		i++;
-		__std__vidmem[i] = color;
+		RAMBUFFER[i] = color;
 		i++;
 	}
-	__std__vidmem[0] = ' ';
-	__std__vidmem[1] = color;
+	RAMBUFFER[0] = ' ';
+	RAMBUFFER[1] = color;
+	__std__flush();
 }
 
 void __std__goto(int index)
 {
-	__std__vidmem[index] = __std__vidmem[index];
-	__std__vidmem[index + 1] = color;
+	RAMBUFFER[index] = RAMBUFFER[index];
+	RAMBUFFER[index + 1] = color;
+	__std__flush();
 }
 
 void __std__gotoxy(int x, int y)

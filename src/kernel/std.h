@@ -1,3 +1,6 @@
+#define MAX_WORDS 1000
+#define MAX_WORD_LEN 1000
+
 char *__std__vidmem = (char *)0xb8000;
 
 int __std__strlen(const char *str);
@@ -15,41 +18,67 @@ enum colors __std__color(enum colors c)
 // В лесу родилась Ёлочка
 void __std_music()
 {
-	__driver_audio_tone(247, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(370, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(329, 0x10FFFFFF);
-	__driver_audio_tone(247, 0x10FFFFFF);
-	__driver_audio_tone(247, 0x10FFFFFF);
-	__driver_audio_tone(247, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(370, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(497, 0x10FFFFFF);
-	__std__sleep(0x15FFFFFF);
-	__driver_audio_tone(497, 0x10FFFFFF);
-	__driver_audio_tone(277, 0x10FFFFFF);
-	__driver_audio_tone(2770, 0x10FFFFFF);
-	__driver_audio_tone(440, 0x10FFFFFF);
-	__driver_audio_tone(440, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(370, 0x10FFFFFF);
-	__driver_audio_tone(329, 0x10FFFFFF);
-	__driver_audio_tone(247, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(370, 0x10FFFFFF);
-	__driver_audio_tone(417, 0x10FFFFFF);
-	__driver_audio_tone(329, 0x10FFFFFF);
+	__driver_audio_tone(247, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(370, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(329, 1000);
+	__driver_audio_tone(247, 1000);
+	__driver_audio_tone(247, 1000);
+	__driver_audio_tone(247, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(370, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(497, 1000);
+	__std__sleep(1000);
+	__driver_audio_tone(497, 1000);
+	__driver_audio_tone(277, 1000);
+	__driver_audio_tone(2770, 1000);
+	__driver_audio_tone(440, 1000);
+	__driver_audio_tone(440, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(370, 1000);
+	__driver_audio_tone(329, 1000);
+	__driver_audio_tone(247, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(370, 1000);
+	__driver_audio_tone(417, 1000);
+	__driver_audio_tone(329, 1000);
 }
 
 int __std__rand(void)
 {
 	next = next * 1103515245;
 	return ((unsigned int)(next / 65536) * 2768);
+}
+
+void __std__srand(unsigned int seed)
+{
+	unsigned int *state = (unsigned int *)0x2000;
+	*state = seed;
+}
+
+int __std__rand_r(unsigned int *seed)
+{
+	*seed = *seed * 1103515245 + 12345;
+	return (unsigned int)(*seed / 65536) % 32768;
+}
+
+unsigned int __std__time(unsigned int *t)
+{
+	static unsigned int seconds = 0;
+	if (t != NULL)
+	{
+		seconds = *t;
+	}
+	else
+	{
+		seconds++;
+	}
+	return seconds;
 }
 
 void __std__cursorPosition(int pos)
@@ -90,17 +119,27 @@ void *__std__memset(byte32i *dst, char c, byte32i n)
 		*temp++ = c;
 	return dst;
 }
-
-void __std__sleep(byte32 __std__sleep_time)
+// in milliseconds
+void __std__sleep(byte32 ms)
 {
-	int microseconds = (__std__sleep_time * 60) / 255;
-	while (true)
+	byte32 cycles = (byte32)ms * 10000;
+	__std__nop_delay(cycles);
+}
+// delay in NOP
+void __std__nop_delay(byte32 cycles)
+{
+	byte32 i;
+	for (i = 0; i < cycles; i++)
 	{
-		asm("nop");
-		microseconds--;
-		if (microseconds <= 0)
-			break;
+		asm volatile("nop");
 	}
+}
+// in microseconds
+void __std__wait(byte32 us)
+{
+	/* преобразуем время в такты, используя частоту 1 ГГц */
+	byte32 cycles = (byte32)us * 1000;
+	__std__nop_delay(cycles);
 }
 
 bool __std__strcmp(char *input, char *check)
@@ -133,6 +172,61 @@ int __std__strncmp(const char *s1, const char *s2, int c)
 	return result;
 }
 
+void __std__strcat(char* dest, const char* src) {
+    // Move dest pointer to end of string
+    while (*dest != '\0') {
+        dest++;
+    }
+    // Copy src to dest
+    while (*src != '\0') {
+        *dest = *src;
+        dest++;
+        src++;
+    }
+    // Add terminating null character to dest
+    *dest = '\0';
+}
+
+char* __std__strchr(const char* str, int c) {
+     while (*str && *str != c) {
+        str++;
+    }
+    return (*str == c) ? (char*) str : NULL;
+}
+
+char* __std__strtok(char* str, const char* delim) {
+    static char* saved_str = NULL;
+    char* token;
+    
+    if (str != NULL) {
+        saved_str = str;
+    }
+    
+    token = saved_str;
+    while (*token != '\0' && __std__strchr(delim, *token) != NULL) {
+        token++;
+    }
+    
+    if (*token == '\0') {
+        saved_str = NULL;
+        return NULL;
+    }
+    
+    char* end = token + 1;
+    while (*end != '\0' && __std__strchr(delim, *end) == NULL) {
+        end++;
+    }
+    
+    if (*end == '\0') {
+        saved_str = NULL;
+    } else {
+        *end = '\0';
+        saved_str = end + 1;
+    }
+    
+    return token;
+}
+
 char *__std__strstr(const char *in, const char *str)
 {
 	char c;
@@ -156,6 +250,33 @@ char *__std__strstr(const char *in, const char *str)
 
 	return (char *)(in - 1);
 }
+
+
+void* __std__realloc(void* ptr, int size) {
+    void* new_ptr;
+
+    // Если size = 0, то realloc ведет себя как free и возвращает NULL
+    if (size == 0) {
+        __std__free(ptr);
+        return NULL;
+    }
+
+    // Если ptr = NULL, то realloc ведет себя как malloc и выделяет новую область памяти
+    if (ptr == NULL) {
+        return __std__malloc(size);
+    }
+
+    // Иначе необходимо изменить размер области памяти
+    new_ptr = __std__malloc(size);
+
+    if (new_ptr != NULL) {
+        __std__memcpy(new_ptr, ptr, size);
+        __std__free(ptr);
+    }
+
+    return new_ptr;
+}
+
 
 char *__std__strcpy(char *destination, const char *source)
 {
@@ -211,6 +332,21 @@ int __std__strlen(const char *str)
 	return length;
 }
 
+char** __std__strsplit(char* str, const char* tok) {
+    char** words = (char**) __std__malloc(MAX_WORDS * sizeof(char*));
+    char* word;
+    int i = 0;
+    word = __std__strtok(str, tok);
+    while (word != NULL) {
+        words[i] = (char*) __std__malloc(MAX_WORD_LEN * sizeof(char));
+        __std__strcpy(words[i], word);
+        i++;
+        word = __std__strtok(NULL, tok);
+    }
+    words[i] = NULL;
+    return words;
+}
+
 int __std__digit_count(int num)
 {
 	int count = 0;
@@ -247,35 +383,40 @@ void __std__itoa(int num, char *number)
 	}
 }
 
-void __std__itoan(char *buf, int base, int d) {
-    char *p = buf;
-    char *p1, *p2;
-    unsigned long ud = d;
-    int divisor = 10;
+void __std__itoan(char *buf, int base, int d)
+{
+	char *p = buf;
+	char *p1, *p2;
+	unsigned long ud = d;
+	int divisor = 10;
 
-    if (base == 'd' && d < 0) {
-        *p++ = '-';
-        buf++;
-        ud = -d;
-    } else if (base == 'x')
-        divisor = 16;
+	if (base == 'd' && d < 0)
+	{
+		*p++ = '-';
+		buf++;
+		ud = -d;
+	}
+	else if (base == 'x')
+		divisor = 16;
 
-    do {
-        int remainder = ud % divisor;
-        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
-    } while (ud /= divisor);
+	do
+	{
+		int remainder = ud % divisor;
+		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
+	} while (ud /= divisor);
 
-    *p = 0;
+	*p = 0;
 
-    p1 = buf;
-    p2 = p - 1;
-    while (p1 < p2) {
-        char tmp = *p1;
-        *p1 = *p2;
-        *p2 = tmp;
-        p1++;
-        p2--;
-    }
+	p1 = buf;
+	p2 = p - 1;
+	while (p1 < p2)
+	{
+		char tmp = *p1;
+		*p1 = *p2;
+		*p2 = tmp;
+		p1++;
+		p2--;
+	}
 }
 
 void __std__symcol(char color)
@@ -395,60 +536,66 @@ void __std__printc(char *message, enum colors color)
 		__temp__char = message[j];
 	}
 }
-//normal printf
-void __std__printff(const char *format, ...) {
-    char **arg = (char **)&format;
-    int c;
-    char buf[32];
+// normal printf
+void __std__printff(const char *format, ...)
+{
+	char **arg = (char **)&format;
+	int c;
+	char buf[32];
 
-    arg++;
+	arg++;
 
-    __std__memset(buf, 0, sizeof(buf));
-    while ((c = *format++) != 0) {
-        if (c != '%')
-            __std__putc(c);
-        else {
-            char *p, *p2;
-            int pad0 = 0, pad = 0;
+	__std__memset(buf, 0, sizeof(buf));
+	while ((c = *format++) != 0)
+	{
+		if (c != '%')
+			__std__putc(c);
+		else
+		{
+			char *p, *p2;
+			int pad0 = 0, pad = 0;
 
-            c = *format++;
-            if (c == '0') {
-                pad0 = 1;
-                c = *format++;
-            }
+			c = *format++;
+			if (c == '0')
+			{
+				pad0 = 1;
+				c = *format++;
+			}
 
-            if (c >= '0' && c <= '9') {
-                pad = c - '0';
-                c = *format++;
-            }
+			if (c >= '0' && c <= '9')
+			{
+				pad = c - '0';
+				c = *format++;
+			}
 
-            switch (c) {
-                case 'd':
-                case 'u':
-                case 'x':
-                    __std__itoan(buf, c, *((int *)arg++));
-                    p = buf;
-                    goto string;
-                    break;
+			switch (c)
+			{
+			case 'd':
+			case 'u':
+			case 'x':
+				__std__itoan(buf, c, *((int *)arg++));
+				p = buf;
+				goto string;
+				break;
 
-                case 's':
-                    p = *arg++;
-                    if (!p)
-                        p = "(null)";
+			case 's':
+				p = *arg++;
+				if (!p)
+					p = "(null)";
 
-                string:
-                    for (p2 = p; *p2; p2++)
-                        ;
-                    for (; p2 < p + pad; p2++)
-                        __std__putc(pad0 ? '0' : ' ');
-                    while (*p)
-                    	__std__putc(*p++);
-                    break;
+			string:
+				for (p2 = p; *p2; p2++)
+					;
+				for (; p2 < p + pad; p2++)
+					__std__putc(pad0 ? '0' : ' ');
+				while (*p)
+					__std__putc(*p++);
+				break;
 
-                default:
-                    __std__putc(*((int *)arg++));
-                    break;
-            }
-        }
-    }
+			default:
+				__std__putc(*((int *)arg++));
+				break;
+			}
+		}
+	}
 }

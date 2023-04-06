@@ -1,3 +1,6 @@
+#define MULTIBOOT_MAGIC_HEADER 0x1BADB002
+#define MULTIBOOT_BOOTLOADER_MAGIC 0x2BADB002
+
 #define NULL '\0'
 //#define new(t) __std__malloc(sizeof(t))
 #define bool int
@@ -137,3 +140,152 @@ byte *btarrev(byte *arr)
   }
   return narr;
 }
+
+
+typedef struct
+{
+    struct
+    {
+        byte32i k_start_addr;
+        byte32i k_end_addr;
+        byte32i k_len;
+        byte32i text_start_addr;
+        byte32i text_end_addr;
+        byte32i text_len;
+        byte32i data_start_addr;
+        byte32i data_end_addr;
+        byte32i data_len;
+        byte32i bss_start_addr;
+        byte32i bss_end_addr;
+        byte32i bss_len;
+    } kernel;
+
+    struct
+    {
+        byte32i total_memory;
+    } system;
+
+    struct
+    {
+        byte32i start_addr;
+        byte32i end_addr;
+        byte32i size;
+    } available;
+} KERNEL_MEMORY_MAP;
+
+extern KERNEL_MEMORY_MAP g_kmap;
+
+KERNEL_MEMORY_MAP g_kmap;
+
+static long long __shell_pointer = 0;
+
+/* The Multiboot header. */
+typedef struct
+{
+    byte32i magici;
+    byte32i flags;
+    byte32i checksum;
+    byte32i header_addr;
+    byte32i load_addr;
+    byte32i load_end_addr;
+    byte32i bss_end_addr;
+    byte32i entry_addr;
+} _MULTIBOOT_HEADER;
+
+/* The symbol table for a.out. */
+typedef struct
+{
+    byte32i tabsize;
+    byte32i strsize;
+    byte32i addr;
+    byte32i reserved;
+} AOUT_SYMBOL_TABLE;
+
+/* The section header table for ELF. */
+typedef struct
+{
+    byte32i num;
+    byte32i size;
+    byte32i addr;
+    byte32i shndx;
+} ELF_SECTION_HEADER_TABLE;
+
+typedef struct
+{
+    /* required, defined in entry.asm */
+    byte32i flags;
+
+    /* available low-high memory from BIOS, present if flags[0] is set(MEMINFO in entry.asm) */
+    byte32i mem_low;
+    byte32i mem_high;
+
+    /* "root" partition, present if flags[1] is set(BOOTDEVICE in entry.asm) */
+    byte32i boot_device;
+
+    /* kernel command line, present if flags[2] is set(CMDLINE in entry.asm) */
+    byte32i cmdline;
+
+    /* no of modules loaded, present if flags[3] is set(MODULECOUNT in entry.asm) */
+    byte32i modules_count;
+    byte32i modules_addr;
+
+    /* symbol table info, present if flags[4] & flags[5] is set(SYMT in entry.asm) */
+    union
+    {
+        AOUT_SYMBOL_TABLE aout_sym;
+        ELF_SECTION_HEADER_TABLE elf_sec;
+    } u;
+
+    /* memory mapping, present if flags[6] is set(MEMMAP in entry.asm) */
+    byte32i mmap_length;
+    byte32i mmap_addr;
+
+    /* drive info, present if flags[7] is set(DRIVE in entry.asm) */
+    byte32i drives_length;
+    byte32i drives_addr;
+
+    /* ROM configuration table, present if flags[8] is set(CONFIGT in entry.asm) */
+    byte32i config_table;
+
+    /* boot loader name, present if flags[9] is set(BOOTLDNAME in entry.asm) */
+    byte32i boot_loader_name;
+
+    /* Advanced Power Management(APM) table, present if flags[10] is set(APMT in entry.asm) */
+    byte32i apm_table;
+
+    /* video info, present if flags[11] is set(VIDEO in entry.asm) */
+    byte32i vbe_control_info;
+    byte32i vbe_mode_info;
+    bit8 vbe_mode;
+    bit8 vbe_interface_seg;
+    bit8 vbe_interface_off;
+    bit8 vbe_interface_len;
+
+    /* video framebufer info, present if flags[12] is set(VIDEO_FRAMEBUF in entry.asm)  */
+    byte32i framebuffer_addr;
+    byte32i framebuffer_pitch;
+    byte32i framebuffer_width;
+    byte32i framebuffer_height;
+    byte framebuffer_bpp;
+    byte framebuffer_type; // indexed = 0, RGB = 1, EGA = 2
+
+} MULTIBOOT_INFO;
+
+typedef enum
+{
+    MULTIBOOT_MEMORY_AVAILABLE = 1,
+    MULTIBOOT_MEMORY_RESERVED,
+    MULTIBOOT_MEMORY_ACPI_RECLAIMABLE,
+    MULTIBOOT_MEMORY_NVS,
+    MULTIBOOT_MEMORY_BADRAM
+} MULTIBOOT_MEMORY_TYPE;
+
+typedef struct
+{
+    byte32i size;
+    byte32i addr_low;
+    byte32i addr_high;
+    byte32i len_low;
+    byte32i len_high;
+    MULTIBOOT_MEMORY_TYPE type;
+} MULTIBOOT_MEMORY_MAP;

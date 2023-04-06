@@ -1,47 +1,96 @@
+char* USERNAMENONAMEINAMUROSSHELLSRING = "frostysf";
+
 process __boot_process;
 process __shell_process;
 
-static long long __shell_pointer = 0;
+char* __shell__user__setPointerNOUSER(char* string){
+    if(string == ""){
+        __std__printf("> ");
+    }else{
+        __std__printff("%s@%s",USERNAMENONAMEINAMUROSSHELLSRING,string);
+        __std__newline();
+        __std__printf("> ");
+        __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+    }
+}
 
-void __shell_offset() {
+void __shell_offset()
+{
+
     char *str = "";
     if (__shell_pointer != 0)
-    	__std__printf("> ");
+        __shell__user__setPointerNOUSER("/user");
     __shell_pointer++;
     __std__scanf(str);
     if (__std__strcmp(str, "help") || __std__strcmp(str, "HELP"))
     {
         __std__printff("\nUse -soundhw pcspk in QEMU or choose pc speaker in emulator%s", SYSVER);
-        __std__printc("\n>--------help list--------<", 112);
-        __std__printf("\n= reboot  cls        music=");
-        __std__printf("\n= sleep   videomode  help =");
+        __std__printc(">--------help list--------<", 112);
+        __std__printf("\n= reboot  cls        help =");
+        __std__printf("\n= sleep   videomode  shut =");
         __std__printf("\n= test    echo            =");
         __std__printf("\n= sysver  setcursor       =");
-        __std__printf("\n= beep    shutdown        =");
+        __std__printf("\n= beep    music           =");
         __std__printf("\n= rand    wf              =");
         __std__printf("\n= rf      testfs          =");
         __std__printf("\n===========================");
     }
     else if (__std__strcmp(str, "reboot") || __std__strcmp(str, "REBOOT"))
     {
-        reboot();
+        write_port(0x64, 0xFE);
     }
-    else if (__std__strcmp(str, "shutdown") || __std__strcmp(str, "SHUTDOWN"))
+    else if (__std__strcmp(str, "shut") || __std__strcmp(str, "SHUT"))
     {
-        shutdown();
+        __asm__("outw %%ax, %%dx"
+                :
+                : "a"(0x2000), "d"(0x604)); // worked on QEMU
     }
     else if (__std__strcmp(str, "cls") || __std__strcmp(str, "CLS"))
     {
-        __std__gotoxy(0, 0);
         __std__cls();
+        __std__gotoxy(0, 0);
+        __std__printc(HEADER, 112);
+        __std__gotoxy(0, 0);
     }
     else if (__std__strcmp(str, "sleep") || __std__strcmp(str, "SLEEP"))
     {
-        __std__sleep(0x10FFFFFF);
+        __std__sleep(10000);
     }
     else if (__std__strcmp(str, "sysver") || __std__strcmp(str, "SYSVER"))
     {
+        __std__cls();
+        __std__gotoxy(0, 0);
+        __std__printc(HEADER, 112);
+        __std__gotoxy(0, 0);
+        __std__printff("\nusername: %s", USERNAMENONAMEINAMUROSSHELLSRING);
         __std__printf(SYSVER);
+        MULTIBOOT_INFO *mboot_info;
+        byte32i i;
+        __std__printff("magici: 0x%x\n", magici);
+        if (magici == MULTIBOOT_BOOTLOADER_MAGIC)
+        {
+            mboot_info = (MULTIBOOT_INFO *)addri;
+            __std__printff("  flags: 0x%x\n", mboot_info->flags);
+            __std__printff("  mem_low: 0x%x KB\n", mboot_info->mem_low);
+            __std__printff("  mem_high: 0x%x KB\n", mboot_info->mem_high);
+            __std__printff("  boot_device: 0x%x\n", mboot_info->boot_device);
+            __std__printff("  cmdline: %s\n", (char *)mboot_info->cmdline);
+            __std__printff("  modules_count: %d\n", mboot_info->modules_count);
+            __std__printff("  modules_addr: 0x%x\n", mboot_info->modules_addr);
+            __std__printff("  mmap_length: %d\n", mboot_info->mmap_length);
+            __std__printff("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
+            __std__printff("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
+            __std__printff("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
+            __std__printff("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
+            __std__printff("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
+            __std__printff("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
+            __std__printff("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
+            __std__printff("  framebuffer_type: %d", mboot_info->framebuffer_type);
+        }
+        else
+        {
+            __std__printff("invalid multiboot magici number\n");
+        }
     }
     else if (__std__strcmp(str, "beep") || __std__strcmp(str, "BEEP"))
     {
@@ -53,42 +102,17 @@ void __shell_offset() {
     }
     else if (__std__strcmp(str, "videomode") || __std__strcmp(str, "VIDEOMODE"))
     {
-        //__process_pop();
         __desktop_init();
-        //__desktop_offset();
         __process_push(__desktop_process);
         __start_process(3);
-        //__start_processes();
     }
     else if (__std__strstr(str, "wf ") || __std__strstr(str, "WF "))
-    {
-        char *Word, *String;
-        int iWordLen = 0, StringLen = 0;
-
-        char *firstWord, *otherString;
-        int WordLen = 0, otherStringLen = 0;
-
-        char *space = __std__strstr(str, " ");
-        WordLen = space - str;
-        otherStringLen = __std__strlen(str) - WordLen - 1;
-
-        char *ispace = __std__strstr(__std__strncpy(otherString, &space[1], otherStringLen + 1), " ");
-        iWordLen = ispace - __std__strncpy(otherString, &space[1], otherStringLen + 1);
-        StringLen = __std__strlen(__std__strncpy(otherString, &space[1], otherStringLen + 1)) - iWordLen - 1;
-
-        __fs_writefile(__std__strncpy(otherString, &space[1], otherStringLen + 1), __std__strlen(__std__strncpy(String, &ispace[1], StringLen + 1)), __std__strncpy(String, &ispace[1], StringLen + 1));
+    {       
+        __fs_writefile(__std__strtok(str, " ")[1], sizeof((char*)__std__strsplit(str," ")[2]) * sizeof(char*), (char*)__std__strsplit(str," ")[2]);
     }
     else if (__std__strstr(str, "rf ") || __std__strstr(str, "RF "))
     {
-        char *firstWord, *otherString;
-        int WordLen = 0, otherStringLen = 0;
-
-        char *space = __std__strstr(str, " ");
-        WordLen = space - str;
-        otherStringLen = __std__strlen(str) - WordLen - 1;
-
-        __std__newline();
-        __std__printf(__fs_readfile(__std__strncpy(otherString, &space[1], otherStringLen + 1)));
+        __std__printff("\n%s", __fs_readfile(__std__strsplit(str, " ")[1]));
     }
     else if (__std__strcmp(str, "test") || __std__strcmp(str, "TEST"))
     {
@@ -117,8 +141,7 @@ void __shell_offset() {
         WordLen = space - str;
         otherStringLen = __std__strlen(str) - WordLen - 1;
 
-        __std__newline();
-        __std__printf(__std__strncpy(otherString, &space[1], otherStringLen + 1));
+        __std__printff("\n%s", __std__strncpy(otherString, &space[1], otherStringLen + 1));
     }
     else if (__std__strstr(str, "setcursor ") || __std__strcmp(str, "SETCURSOR"))
     {
@@ -155,16 +178,18 @@ void __shell_offset() {
     __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
 }
 
-void __shell_init() {
+void __shell_init()
+{
     __shell_process.offset = *__shell_offset;
 }
 
-void __boot_offset() {
-	__driver_audio_beeps();
+void __boot_offset()
+{
+    __driver_audio_beeps();
     __std__cls();
     __driver_kb_idt_init();
     __std__printf(logo);
-    __driver_kb_wait();
+    __std__sleep(1000);
     __std__color(7);
     __std__cls();
     __std__goto(0);
@@ -177,17 +202,13 @@ void __boot_offset() {
     __std__gotoxy(0, 1);
     __std__printf("\nWelcome to AmurOS!\n");
     __std__printf("Type 'help' to view the list of commands\n");
-    create_descriptor(0, 0, 0);
-    create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0));
-    create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0));
-    create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3));
-    create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3));
 
     __shell_init();
     __process_push(__shell_process);
     __start_processes(2);
 }
 
-void __boot_init() {
+void __boot_init()
+{
     __boot_process.offset = *__boot_offset;
 }

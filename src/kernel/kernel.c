@@ -1,7 +1,10 @@
 // sysinfo
-#define SYSVER "\nSysName: AmurOS\nversion: 0.0.7g\nCorp: AmurOS"
+#define SYSVER "\nSysName: AmurOS\nversion: 0.0.7i\nTeam: AmurOS-Dev\n"
 // header
 #define HEADER "                                      Amur                                      "
+
+unsigned long magici;
+unsigned long addri;
 
 char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
              "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
@@ -31,8 +34,10 @@ char *logo = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 #include "include.h"
 
-void kmain(void)
+void kmain(unsigned long magic, unsigned long addr)
 {
+    addri = addr;
+    magici = magic;
     __boot_init();
     __process_push(__boot_process);
     __start_process(1);

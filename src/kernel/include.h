@@ -16,10 +16,10 @@ asm volatile ("outb %%al,%%dx": :"dN"(port), "a"(value));
 }
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
-void shutdown(void);
 void __std_music();
 void __driver_audio_beeps();
-void __std__sleep(byte32 __std__sleep_time);
+void __std__sleep(byte32 ms);
+//#include "multiboot.h"
 #include "colors.h"
 static void *__std__malloc(unsigned int sz);
 void __std__putc(char ch);
@@ -27,10 +27,13 @@ void __std__cursorPosition(int pos);
 void __std__delete();
 #include "drivers/keyboard.h"
 #include "drivers/sound.h"
-#include "drivers/graphics.h"
+#include "drivers/vga.h"
 #include "std.h"
 #include "dict.h"
+#include "drivers/cmos_clock.h"
+#include "drivers/vesa.h"
 #include "drivers/fs.h"
+#include "drivers/atapi.h"
 #include "process.h"
 #include "gdt.h"
 #include "AGE/plasmaUI.h"

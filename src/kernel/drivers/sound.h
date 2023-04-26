@@ -23,7 +23,7 @@ static void __driver_audio_nosound()
 void __driver_audio_beeps()
 {
     __driver_audio_play_sound(1000);
-    __std__sleep(0x09FFFFFF);
+    __std__sleep(1000);
     __driver_audio_nosound();
 }
 

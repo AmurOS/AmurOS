@@ -8,6 +8,7 @@ struct IDT_entry
 };
 
 struct IDT_entry __driver_kb_IDT[IDT_SIZE];
+bool capslock = false;
 bool shift = false;
 void __driver_kb_idt_init(void)
 {
@@ -85,19 +86,20 @@ void __driver_kb_keyboard_handler_main(void)
 		if (keycode < 0)
 			return;
 
-		if (keycode == 0x36 || keycode == 0x2A)
+		if (keycode == 0x36 || keycode == 0x2A) //shift
 		{
 			if (shift == true)
 				shift = false;
 			else if (shift == false)
 				shift = true;
 		}
-		if (keycode == 0x3A)
+		
+		if (keycode == 0x3A) //capslock
 		{
-			if (shift == true)
-				shift = false;
-			else if (shift == false)
-				shift = true;
+			if (capslock == true)
+				capslock = false;
+			else if (capslock == false)
+				capslock = true;
 		}
 
 		if (keycode == ENTER_KEY_CODE)

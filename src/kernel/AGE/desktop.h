@@ -44,16 +44,17 @@ __plasmaUI_Button startbtn;
 // так барсик, я вижу что ты тут хотел обновлять экран так что не пытайся покаб язнаю эту проблему и
 // даже делал двойную буферизацию оно помагало но мерцания все еще были
 
-
 void __desktop_offset()
 {
     __graphics_init();
-    //clear_screen(BLACK);
+    __graphics_clear(BLACK);
+    // clear_screen(BLACK);
     char amuroslabel[] = "AMUROS";
 
     //__graphics_RectR(40, 40, 60, 40, 10, RED);
     __plasmaUI_drawString(WIDTHSCREEN / 2 - (__std__strlen(amuroslabel) * BITMAP_SIZE), HEIGHTSCREEN / 2, WHITE01, amuroslabel, sizeof(amuroslabel));
     __desktop_taskbar();
+    __desktop_toolbar();
     __plasmaUI_MessageBox("test msg", "hello derpy");
     TerminalTest();
 }
@@ -65,12 +66,18 @@ void __desktop_taskbar()
     startbtn.y = BOTTOM - HEIGHTTASKBAR - 2;
     startbtn.width = 10;
     startbtn.height = HEIGHTTASKBAR;
-    startbtn.cornerRadius = 3;
+    startbtn.cornerRadius = 0;
     startbtn.color = BLUE01;
     startbtn.str = "a";
     // draw
     __plasmaUI_CreateButton(startbtn);
-    __graphics_RectR(LEFT + 16, BOTTOM - HEIGHTTASKBAR - 2, WIDTHSCREEN - 20, HEIGHTTASKBAR, 3, BLUE01);
+    __graphics_RectR(LEFT + 16, BOTTOM - HEIGHTTASKBAR - 2, WIDTHSCREEN - 20, HEIGHTTASKBAR, 0, BLUE01);
+}
+
+// toolbar
+void __desktop_toolbar()
+{
+    __graphics_RectR(LEFT, TOP, WIDTHSCREEN, HEIGHTTASKBAR - 4, 0, BLUE01);
 }
 
 void __desktop_init()

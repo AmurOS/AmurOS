@@ -119,6 +119,7 @@ void *__std__memset(byte32i *dst, char c, byte32i n)
 		*temp++ = c;
 	return dst;
 }
+
 // in milliseconds
 void __std__sleep(byte32 ms)
 {
@@ -346,6 +347,17 @@ char** __std__strsplit(char* str, const char* tok) {
     words[i] = NULL;
     return words;
 }
+
+void __std__toLowerCase(char str[]){
+   int i = 0;
+   while (str[i] != '\0') {
+      if (str[i] >= 'A' && str[i] <= 'Z') {
+         str[i] = str[i] + 32;
+      }
+      i++;
+   }
+}
+
 
 int __std__digit_count(int num)
 {

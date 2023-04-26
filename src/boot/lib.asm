@@ -6,7 +6,6 @@ global _read_port
 global _write_port
 global _load_idt
 global _reboot
-global _shutdown
 extern ___driver_kb_keyboard_handler_main
 _read_port:
 	mov edx, [esp + 4]

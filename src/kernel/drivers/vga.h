@@ -223,3 +223,23 @@ void set_crt_controller_registers()
         write_port(VGA_CRTC_DATA, crtc_data[index]);
     }
 }
+
+//video
+
+enum video_type
+{
+    VIDEO_TYPE_NONE = 0x00,
+    VIDEO_TYPE_COLOUR = 0x20,
+    VIDEO_TYPE_MONOCHROME = 0x30,
+};
+ 
+bit8 detect_bios_area_hardware(void)
+{
+    const bit8* bda_detected_hardware_ptr = (const bit8*) 0x410;
+    return *bda_detected_hardware_ptr;
+}
+ 
+enum video_type get_bios_area_video_type(void)
+{
+    return (enum video_type) (detect_bios_area_hardware() & 0x30);
+}

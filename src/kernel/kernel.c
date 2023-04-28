@@ -1,5 +1,5 @@
 // sysinfo
-#define SYSVER "\nSysName: AmurOS\nversion: 0.0.7i\nTeam: AmurOS-Dev\n"
+#define SYSVER "\nSysName: AmurOS\nversion: 0.0.7j\nTeam: AmurOS-Dev\n"
 // header
 #define HEADER "                                      Amur                                      "
 

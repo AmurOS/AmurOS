@@ -2,7 +2,7 @@ char *USERNAMENONAMEINAMUROSSHELLSRING = "userok";
 
 process __boot_process;
 process __shell_process;
-//отстой
+// отстой
 char *__shell__user__setPointerNOUSER(char *string)
 {
     if (string == "")
@@ -20,7 +20,7 @@ char *__shell__user__setPointerNOUSER(char *string)
 
 void __shell_offset()
 {
-
+   
     char *str = "";
     if (__shell_pointer != 0)
         __shell__user__setPointerNOUSER("");
@@ -214,7 +214,36 @@ void __shell_cmd_ini(char *str)
     }
     else if (__shell_cmd_commandcmp(str, "test"))
     {
-        __std__printc("\nhello\nworld", 32);
+        gdt_init();
+        idt_init();
+        //mouse_init();
+
+        //available modes: 320×200	640×400	640×480	800×500	800×600	896×672	1024×640	1024×768	1152×720	1280×1024	1360×768	1440×900	1600×1200
+        int ret = __vesa_init(1280, 1024, 32);
+        if (ret < 0) {
+            __std__printff("\nfailed to init vesa graphics");
+        }
+        else{
+            byte32i x = 0;
+            for (byte32i c = 0; c < 267; c++) {
+                for (byte32i i = 0; i < 1024; i++) {
+                    __vesa_putpixel(x, i, __vesa_VBE_RGB(c % 255, 0, 0));
+                }
+                x++;
+            }
+            for (byte32i c = 0; c < 267; c++) {
+                for (byte32i i = 0; i < 1024; i++) {
+                    __vesa_putpixel(x, i, __vesa_VBE_RGB(0, c % 255, 0));
+                }
+                x++;
+            }
+            for (byte32i c = 0; c < 267; c++) {
+                for (byte32i i = 0; i < 1024; i++) {
+                    __vesa_putpixel(x, i, __vesa_VBE_RGB(0, 0, c % 255));
+                }
+                x++;
+            }
+        }
     }
     else if (__shell_cmd_commandcmp(str, "rand"))
     {

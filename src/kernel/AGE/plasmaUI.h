@@ -1,10 +1,9 @@
 #define BITMAP_SIZE 8
 
-#define HEIGHTBORDERTOP 10
-#define BASEBORDER 2
-#define CORNERRADIUS 3
-
-#define HEIGHTTASKBAR 10
+#define HEIGHTBORDERTOP 15
+#define BASEBORDER 5
+#define CORNERRADIUS 5
+#define MAINCOLOR __vesa_VBE_RGB(51,51,51)
 
 typedef struct __plasmaUI_Button
 {
@@ -12,85 +11,19 @@ typedef struct __plasmaUI_Button
     int y;
     int width;
     int height;
-    char color;
+    int color;
+    int background;
     char *str;
     int cornerRadius;
 } __plasmaUI_Button;
 
-// window form
-typedef struct __plasmaUI_windowINI
-{
-    int positionX;
-    int positionY;
-    int height;
-    int width;
-    int cornRadius;
-    bool fullScreen;
-    char *title;
-    char color:WHITE;
-} __desktop_windowINI;
-
 void __plasmaUI_CreateButton(__plasmaUI_Button button)
 {
-    __graphics_RectR(button.x, button.y, button.width, button.height, button.cornerRadius, button.color);
+    __vesa_RectR(button.x, button.y, button.width, button.height, button.cornerRadius, button.background);
     if (__std__strlen(button.str) > 0)
-        __plasmaUI_drawString(button.x + (button.width - (__std__strlen(button.str) * BITMAP_SIZE)) / 2, button.y + (button.height / 2 - 4), WHITE, button.str, __std__strlen(button.str));
+        __plasmaUI_drawString(button.x + (button.width - (__std__strlen(button.str) * BITMAP_SIZE)) / 2, button.y + (button.height / 2 - 4), button.color, button.str, __std__strlen(button.str));
 }
 
-void __plasmaUI_CreateWindow(__desktop_windowINI window)
-{
-
-    // title, control box
-    window.cornRadius = CORNERRADIUS;
-    __plasmaUI_Button close;
-    close.cornerRadius = 1;
-    close.color = RED;
-    close.width = 10 - 3;
-    close.height = HEIGHTBORDERTOP - 3;
-    close.str = "x";
-
-    if (window.fullScreen == true)
-    {
-        close.x = VGA_MAX_WIDTH - BASEBORDER * 6 - 1;
-        close.y = 0 + 1;
-
-        __graphics_RectR(0, 0, VGA_MAX_WIDTH - 1, VGA_MAX_HEIGHT - HEIGHTTASKBAR - 3, window.cornRadius, BLUE01);
-        __plasmaUI_drawString(BASEBORDER, (HEIGHTBORDERTOP / 2 - 4), WHITE, window.title, __std__strlen(window.title));
-        __plasmaUI_CreateButton(close);
-        // window control in window
-        // base
-        __graphics_fillrect(BASEBORDER, HEIGHTBORDERTOP, (VGA_MAX_WIDTH - 1) - BASEBORDER * 2, VGA_MAX_HEIGHT - HEIGHTBORDERTOP - BASEBORDER - HEIGHTTASKBAR - 3, window.color);
-    }
-    else
-    {
-        close.x = window.positionX + window.width - BASEBORDER * 6;
-        close.y = window.positionY + 1;
-        __graphics_RectR(window.positionX, window.positionY, window.width, window.height, window.cornRadius, BLUE01);
-        __plasmaUI_drawString(window.positionX + BASEBORDER, window.positionY + (HEIGHTBORDERTOP / 2 - 4), WHITE, window.title, __std__strlen(window.title));
-        __plasmaUI_CreateButton(close);
-        // window control in window
-        // base
-        __graphics_fillrect(window.positionX + BASEBORDER-1, window.positionY + HEIGHTBORDERTOP, window.width - BASEBORDER * 2 +2, window.height - HEIGHTBORDERTOP - BASEBORDER, window.color);
-    }
-}
-
-void __plasmaUI_MessageBox(char *title, char *message)
-{
-    __desktop_windowINI window;
-    window.cornRadius = 2;
-    window.height = 50;
-    window.width = 80;
-    window.positionX = VGA_MAX_WIDTH / 2;
-    window.positionY = VGA_MAX_HEIGHT / 2;
-    window.title = title;
-    window.color = WHITE;
-    if (__std__strlen(message) * BITMAP_SIZE > window.width)
-        window.width = __std__strlen(message) * BITMAP_SIZE + BITMAP_SIZE;
-    __plasmaUI_CreateWindow(window);
-    __plasmaUI_drawString(window.positionX + BASEBORDER + 2, window.positionY + HEIGHTBORDERTOP + 4, BLACK91, message, __std__strlen(message));
-
-    //__driver_audio_tone(247, 0x10FFFFFF);
-}
 
 // draw string and font
 byte bitmaps_0_9[10][BITMAP_SIZE] = {
@@ -457,7 +390,7 @@ byte bitmaps_A_Z[26][BITMAP_SIZE] = {
 
 };
 // putpixels of 0-9 bits from right-to-left
-void __plasmaUI_drawNumbitmaps(bit8 index, bit8 x, bit8 y, byte color)
+void __plasmaUI_drawNumbitmaps(int index, int x, int y, int color)
 {
     bit8 temp = 0, pix = 0;
 
@@ -470,7 +403,7 @@ void __plasmaUI_drawNumbitmaps(bit8 index, bit8 x, bit8 y, byte color)
         {
             if (pix & 1)
             {
-                __graphics_putpixel(x, y, color);
+                __vesa_putpixel(x, y, color);
             }
             pix >>= 1;
             x--;
@@ -481,7 +414,7 @@ void __plasmaUI_drawNumbitmaps(bit8 index, bit8 x, bit8 y, byte color)
 }
 
 // putpixels of A-Z bits from right-to-left
-void __plasmaUI_drawAlphabitmaps(bit8 index, bit8 x, bit8 y, byte color)
+void __plasmaUI_drawAlphabitmaps(int index, int x, int y, int color)
 {
     bit8 temp = 0, pix = 0;
 
@@ -494,7 +427,7 @@ void __plasmaUI_drawAlphabitmaps(bit8 index, bit8 x, bit8 y, byte color)
         {
             if (pix & 1)
             {
-                __graphics_putpixel(x, y, color);
+                __vesa_putpixel(x, y, color);
             }
             pix >>= 1;
             x--;
@@ -504,7 +437,7 @@ void __plasmaUI_drawAlphabitmaps(bit8 index, bit8 x, bit8 y, byte color)
     }
 }
 
-void __plasmaUI_drawChar(bit8 x, bit8 y, byte color, char ch)
+void __plasmaUI_drawChar(int x, int y, int color, char ch)
 {
     if (ch >= '0' && ch <= '9')
     {
@@ -520,7 +453,7 @@ void __plasmaUI_drawChar(bit8 x, bit8 y, byte color, char ch)
     }
 }
 
-void __plasmaUI_drawString(bit8 x, bit8 y, byte color, char *str, int size)
+void __plasmaUI_drawString(int x, int y, int color, char *str, int size)
 {
     for (int i = 0; i < __std__strlen(str); i++)
     {

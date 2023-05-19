@@ -89,6 +89,15 @@ void __std__cursorPosition(int pos)
 	write_port(DATA_PORT, pos & 0x00FF);
 }
 
+void __std__cursorPos(byte x, byte y)
+{
+	bit8 cursorLocation = y * COLUMNS_IN_LINE + x;
+	write_port(COMMAND_PORT, HIGH_BYTE_COMMAND);
+	write_port(DATA_PORT, cursorLocation >> 8);
+	write_port(COMMAND_PORT, LOW_BYTE_COMMAND);
+	write_port(DATA_PORT, cursorLocation);
+}
+
 static void *__std__malloc(unsigned int sz)
 {
 	void *mem;
@@ -173,59 +182,72 @@ int __std__strncmp(const char *s1, const char *s2, int c)
 	return result;
 }
 
-void __std__strcat(char* dest, const char* src) {
-    // Move dest pointer to end of string
-    while (*dest != '\0') {
-        dest++;
-    }
-    // Copy src to dest
-    while (*src != '\0') {
-        *dest = *src;
-        dest++;
-        src++;
-    }
-    // Add terminating null character to dest
-    *dest = '\0';
+void __std__strcat(char *dest, const char *src)
+{
+	// Move dest pointer to end of string
+	while (*dest != '\0')
+	{
+		dest++;
+	}
+	// Copy src to dest
+	while (*src != '\0')
+	{
+		*dest = *src;
+		dest++;
+		src++;
+	}
+	// Add terminating null character to dest
+	*dest = '\0';
 }
 
-char* __std__strchr(const char* str, int c) {
-     while (*str && *str != c) {
-        str++;
-    }
-    return (*str == c) ? (char*) str : NULL;
+char *__std__strchr(const char *str, int c)
+{
+	while (*str && *str != c)
+	{
+		str++;
+	}
+	return (*str == c) ? (char *)str : NULL;
 }
 
-char* __std__strtok(char* str, const char* delim) {
-    static char* saved_str = NULL;
-    char* token;
-    
-    if (str != NULL) {
-        saved_str = str;
-    }
-    
-    token = saved_str;
-    while (*token != '\0' && __std__strchr(delim, *token) != NULL) {
-        token++;
-    }
-    
-    if (*token == '\0') {
-        saved_str = NULL;
-        return NULL;
-    }
-    
-    char* end = token + 1;
-    while (*end != '\0' && __std__strchr(delim, *end) == NULL) {
-        end++;
-    }
-    
-    if (*end == '\0') {
-        saved_str = NULL;
-    } else {
-        *end = '\0';
-        saved_str = end + 1;
-    }
-    
-    return token;
+char *__std__strtok(char *str, const char *delim)
+{
+	static char *saved_str = NULL;
+	char *token;
+
+	if (str != NULL)
+	{
+		saved_str = str;
+	}
+
+	token = saved_str;
+	while (*token != '\0' && __std__strchr(delim, *token) != NULL)
+	{
+		token++;
+	}
+
+	if (*token == '\0')
+	{
+		saved_str = NULL;
+		return NULL;
+	}
+
+	char *end = token + 1;
+	while (*end != '\0' && __std__strchr(delim, *end) == NULL)
+	{
+		end++;
+	}
+
+	if (*end == '\0')
+	{
+		saved_str = NULL;
+	}
+	else
+	{
+		*end = '\0';
+		saved_str = end + 1;
+	}
+
+	return token;
 }
 
 char *__std__strstr(const char *in, const char *str)
@@ -252,32 +274,34 @@ char *__std__strstr(const char *in, const char *str)
 	return (char *)(in - 1);
 }
 
+void *__std__realloc(void *ptr, int size)
+{
+	void *new_ptr;
 
-void* __std__realloc(void* ptr, int size) {
-    void* new_ptr;
+	// Если size = 0, то realloc ведет себя как free и возвращает NULL
+	if (size == 0)
+	{
+		__std__free(ptr);
+		return NULL;
+	}
 
-    // Если size = 0, то realloc ведет себя как free и возвращает NULL
-    if (size == 0) {
-        __std__free(ptr);
-        return NULL;
-    }
+	// Если ptr = NULL, то realloc ведет себя как malloc и выделяет новую область памяти
+	if (ptr == NULL)
+	{
+		return __std__malloc(size);
+	}
 
-    // Если ptr = NULL, то realloc ведет себя как malloc и выделяет новую область памяти
-    if (ptr == NULL) {
-        return __std__malloc(size);
-    }
+	// Иначе необходимо изменить размер области памяти
+	new_ptr = __std__malloc(size);
 
-    // Иначе необходимо изменить размер области памяти
-    new_ptr = __std__malloc(size);
+	if (new_ptr != NULL)
+	{
+		__std__memcpy(new_ptr, ptr, size);
+		__std__free(ptr);
+	}
 
-    if (new_ptr != NULL) {
-        __std__memcpy(new_ptr, ptr, size);
-        __std__free(ptr);
-    }
-
-    return new_ptr;
+	return new_ptr;
 }
-
 
 char *__std__strcpy(char *destination, const char *source)
 {
@@ -333,31 +357,26 @@ int __std__strlen(const char *str)
 	return length;
 }
 
-char** __std__strsplit(char* str, const char* tok) {
-    char** words = (char**) __std__malloc(MAX_WORDS * sizeof(char*));
-    char* word;
-    int i = 0;
-    word = __std__strtok(str, tok);
-    while (word != NULL) {
-        words[i] = (char*) __std__malloc(MAX_WORD_LEN * sizeof(char));
-        __std__strcpy(words[i], word);
-        i++;
-        word = __std__strtok(NULL, tok);
-    }
-    words[i] = NULL;
-    return words;
+char *__std__concat(const char *s1, const char *s2)
+{
+	char *result = __std__malloc(__std__strlen(s1) + __std__strlen(s2) + 1);
+	__std__strcpy(result, s1);
+	__std__strcat(result, s2);
+	return result;
 }
 
-void __std__toLowerCase(char str[]){
-   int i = 0;
-   while (str[i] != '\0') {
-      if (str[i] >= 'A' && str[i] <= 'Z') {
-         str[i] = str[i] + 32;
-      }
-      i++;
-   }
+void __std__toLowerCase(char str[])
+{
+	int i = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] >= 'A' && str[i] <= 'Z')
+		{
+			str[i] = str[i] + 32;
+		}
+		i++;
+	}
 }
-
 
 int __std__digit_count(int num)
 {
@@ -438,6 +457,23 @@ void __std__symcol(char color)
 	i++;
 }
 
+char **__std__strsplit(char *str, const char *tok)
+{
+	char **words = (char **)__std__malloc(MAX_WORDS * sizeof(char *));
+	char *word;
+	int i = 0;
+	word = __std__strtok(str, tok);
+	while (word != NULL)
+	{
+		words[i] = (char *)__std__malloc(MAX_WORD_LEN * sizeof(char));
+		__std__strcpy(words[i], word);
+		i++;
+		word = __std__strtok(NULL, tok);
+	}
+	words[i] = NULL;
+	return words;
+}
+
 void __std__newline()
 {
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
@@ -484,6 +520,15 @@ void __std__delete()
 	__std__vidmem[i] = '\0';
 	__std__cursorx += BYTES_FOR_EACH_ELEMENT;
 	__std__cursorx = __std__cursorx - 2;
+}
+
+void __std__delChar()
+{
+	__driver_kb_kbbcur--;
+	__std__cursorx--;
+	__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
+	__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + useroffset + 1);
+	__std__delete();
 }
 
 void __std__clsym(int index)

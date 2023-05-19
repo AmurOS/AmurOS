@@ -1,5 +1,5 @@
 // sysinfo
-#define SYSVER "\nSysName: AmurOS\nversion: 0.0.7j\nTeam: AmurOS-Dev\n"
+#define SYSVER "\nSystem: AmurOS\nversion: 0.0.7k\nTeam: AmurOS-Dev\n"
 // header
 #define HEADER "                                      Amur                                      "
 
@@ -41,4 +41,29 @@ void kmain(unsigned long magic, unsigned long addr)
     __boot_init();
     __process_push(__boot_process);
     __start_process(1);
+}
+
+void __cpuid(byte32i type, byte32i *eax, byte32i *ebx, byte32i *ecx, byte32i *edx) {
+    asm volatile("cpuid"
+                : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
+                : "0"(type));
+}
+
+int cpuid_info(int print) {
+    byte32i brand[12];
+    byte32i eax, ebx, ecx, edx;
+    byte32i type;
+
+    __std__memset(brand, 0, sizeof(brand));
+    __cpuid(0x80000002, (byte32i *)brand+0x0, (byte32i *)brand+0x1, (byte32i *)brand+0x2, (byte32i *)brand+0x3);
+    __cpuid(0x80000003, (byte32i *)brand+0x4, (byte32i *)brand+0x5, (byte32i *)brand+0x6, (byte32i *)brand+0x7);
+    __cpuid(0x80000004, (byte32i *)brand+0x8, (byte32i *)brand+0x9, (byte32i *)brand+0xa, (byte32i *)brand+0xb);
+
+    if (print) {
+        __std__printff("\nBrand: %s\n", brand);
+        for(type = 0; type < 4; type++) {
+            __cpuid(type, &eax, &ebx, &ecx, &edx);
+            __std__printff("type:0x%x, eax:0x%x, ebx:0x%x, ecx:0x%x, edx:0x%x\n", type, eax, ebx, ecx, edx);
+        }
+    }
 }

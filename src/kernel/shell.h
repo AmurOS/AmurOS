@@ -3,27 +3,13 @@ char *USERNAMENONAMEINAMUROSSHELLSRING = "userok";
 process __boot_process;
 process __shell_process;
 // отстой
-char *__shell__user__setPointerNOUSER(char *string)
-{
-    if (string == "")
-    {
-        __std__printf("> ");
-    }
-    else
-    {
-        __std__printff("%s@%s", USERNAMENONAMEINAMUROSSHELLSRING, string);
-        __std__newline();
-        __std__printff("> ");
-        __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
-    }
-}
 
 void __shell_offset()
 {
-   
+    useroffset = __std__strlen(USERNAMENONAMEINAMUROSSHELLSRING) + 1;
     char *str = "";
     if (__shell_pointer != 0)
-        __shell__user__setPointerNOUSER("");
+        __std__printff("%s@%s", USERNAMENONAMEINAMUROSSHELLSRING, "> ");
     __shell_pointer++;
     __std__scanf(str);
 
@@ -38,7 +24,7 @@ void __shell_offset()
         __std__gotoxy(0, 1);
     }
     // ini cursor //ини курсор))))))))))))))))))))))))))))))))))
-    __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+    __std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + useroffset + 1);
 }
 
 void __shell_init()
@@ -48,7 +34,13 @@ void __shell_init()
 
 void __boot_offset()
 {
-    __driver_audio_beeps();
+    gdt_init();
+    idt_init();
+    bios32_init();
+    fpu_enable();
+
+    // int ret = __vesa_init(widthscreen,heightscreen,32);
+    // if(ret<0) {__std__printff("error");}
     __std__cls();
     __driver_kb_idt_init();
     __std__printf(logo);
@@ -79,7 +71,7 @@ void __boot_init()
 bool __shell_cmd_commandcmp(char *str, char *arg)
 {
     __std__toLowerCase(str);
-    if (__std__strcmp(str, arg))
+    if (__std__strstr(str, arg))
         return true;
     else
         return false;
@@ -94,8 +86,8 @@ void __shell_cmd_ini(char *str)
         __std__printf("\n= reboot  cls        help =");
         __std__printf("\n= sleep   videomode  shut =");
         __std__printf("\n= test    videotype  time =");
-        __std__printf("\n= sysinfo setcursor  echo =");
-        __std__printf("\n= beep    music           =");
+        __std__printf("\n= sysinfo setcur     echo =");
+        __std__printf("\n= cpuid   music      beep =");
         __std__printf("\n= rand    mkfil           =");
         __std__printf("\n= rdfil   testfs          =");
         __std__printf("\n===========================");
@@ -161,6 +153,7 @@ void __shell_cmd_ini(char *str)
             __std__printff("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
             __std__printff("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
             __std__printff("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
+            __std__printff("  apm_table:%d\n", mboot_info->apm_table);
             __std__printff("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
             __std__printff("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
             __std__printff("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
@@ -174,8 +167,12 @@ void __shell_cmd_ini(char *str)
         }
         else
         {
-            __std__printff("invalid multiboot magici number\n");
+            __sh_error("invalid multiboot magici number\n");
         }
+    }
+    else if (__shell_cmd_commandcmp(str, "cpuid"))
+    {
+        cpuid_info(1);
     }
     else if (__shell_cmd_commandcmp(str, "beep"))
     {
@@ -187,9 +184,27 @@ void __shell_cmd_ini(char *str)
     }
     else if (__shell_cmd_commandcmp(str, "videomode"))
     {
-        __desktop_init();
-        __process_push(__desktop_process);
-        __start_process(3);
+        int ret = __vesa_init(WIDTHSCREEN, HEIGHTSCREEN, 32);
+        if (ret < 0)
+        {
+            int i;
+            __sh_error("failed to init vesa graphics");
+            __std__printff("rebooting... wait ");
+            for(i = 9;i>0;i--){
+                __std__printff("%d",i);
+                __std__sleep(10000);
+                __std__delChar();
+            }
+            
+            if(i==0)
+                reboot();
+        }
+        else
+        {
+            __desktop_init();
+            __process_push(__desktop_process);
+            __start_process(3);
+        }
     }
     else if (__shell_cmd_commandcmp(str, "mkfil "))
     {
@@ -214,31 +229,47 @@ void __shell_cmd_ini(char *str)
     }
     else if (__shell_cmd_commandcmp(str, "test"))
     {
-        gdt_init();
-        idt_init();
-        //mouse_init();
+        // mouse_init();
 
-        //available modes: 320×200	640×400	640×480	800×500	800×600	896×672	1024×640	1024×768	1152×720	1280×1024	1360×768	1440×900	1600×1200
-        int ret = __vesa_init(1280, 1024, 32);
-        if (ret < 0) {
-            __std__printff("\nfailed to init vesa graphics");
+        // available modes: 320×200	640×400	640×480	800×500	800×600	896×672	1024×640	1024×768	1152×720	1280×1024	1360×768	1440×900	1600×1200
+        int ret = __vesa_init(WIDTHSCREEN, HEIGHTSCREEN, 32);
+        if (ret < 0)
+        {
+            int i;
+            __sh_error("failed to init vesa graphics");
+            __std__printff("rebooting... wait ");
+            for(i = 9;i>0;i--){
+                __std__printff("%d",i);
+                __std__sleep(10000);
+                __std__delChar();
+            }
+            
+            if(i==0)
+                reboot();
         }
-        else{
+        else
+        {
             byte32i x = 0;
-            for (byte32i c = 0; c < 267; c++) {
-                for (byte32i i = 0; i < 1024; i++) {
+            for (byte32i c = 0; c < 267; c++)
+            {
+                for (byte32i i = 0; i < 1024; i++)
+                {
                     __vesa_putpixel(x, i, __vesa_VBE_RGB(c % 255, 0, 0));
                 }
                 x++;
             }
-            for (byte32i c = 0; c < 267; c++) {
-                for (byte32i i = 0; i < 1024; i++) {
+            for (byte32i c = 0; c < 267; c++)
+            {
+                for (byte32i i = 0; i < 1024; i++)
+                {
                     __vesa_putpixel(x, i, __vesa_VBE_RGB(0, c % 255, 0));
                 }
                 x++;
             }
-            for (byte32i c = 0; c < 267; c++) {
-                for (byte32i i = 0; i < 1024; i++) {
+            for (byte32i c = 0; c < 267; c++)
+            {
+                for (byte32i i = 0; i < 1024; i++)
+                {
                     __vesa_putpixel(x, i, __vesa_VBE_RGB(0, 0, c % 255));
                 }
                 x++;
@@ -261,25 +292,11 @@ void __shell_cmd_ini(char *str)
     }
     else if (__shell_cmd_commandcmp(str, "echo "))
     {
-        char *firstWord, *otherString;
-        int WordLen = 0, otherStringLen = 0;
-
-        char *space = __std__strstr(str, " ");
-        WordLen = space - str;
-        otherStringLen = __std__strlen(str) - WordLen - 1;
-
-        __std__printff("\n%s", __std__strncpy(otherString, &space[1], otherStringLen + 1));
+        __std__printff(str + 5);
     }
-    else if (__shell_cmd_commandcmp(str, "setcursor "))
+    else if (__shell_cmd_commandcmp(str, "setcur "))
     {
-        char *firstWord, *otherString;
-        int WordLen = 0, otherStringLen = 0;
-
-        char *space = __std__strstr(str, " ");
-        WordLen = space - str;
-        otherStringLen = __std__strlen(str) - WordLen - 1;
-
-        if (__std__strcmp(__std__strncpy(otherString, &space[1], otherStringLen + 1), "false"))
+        if (__std__strcmp(str + __std__strlen("setcur "), "false"))
         {
             write_port(COMMAND_PORT, 0x0A);
             write_port(DATA_PORT, 0x20);
@@ -291,5 +308,15 @@ void __shell_cmd_ini(char *str)
             write_port(COMMAND_PORT, 0x0A);
             write_port(DATA_PORT, (read_port(DATA_PORT) & 0xC0) | 14);
         }
+    }
+    else if (__shell_cmd_commandcmp(str, "shell"))
+    {
+        __shellnew_init();
+        __process_push(__shellnew_process);
+        __start_process(4);
+    }
+    else if (__shell_cmd_commandcmp(str, "ata"))
+    {
+        __vesa_vbe_print_available_modes();
     }
 }

@@ -115,11 +115,7 @@ void __driver_kb_keyboard_handler_main(void)
 		{
 			if (__driver_kb_kbbcur != 0)
 			{
-				__driver_kb_kbbcur--;
-				__std__cursorx--;
-				__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
-				__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
-				__std__delete();
+				__std__delChar();
 			}
 			return;
 		}
@@ -136,14 +132,14 @@ void __driver_kb_keyboard_handler_main(void)
 		{
 			__driver_kb_kbbuffer[__driver_kb_kbbcur] = Capskeyboard_map[(byte)keycode];
 			__driver_kb_kbbcur++;
-			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + useroffset + 1);
 			__std__putc(Capskeyboard_map[(byte)keycode]);
 		}
 		else
 		{
 			__driver_kb_kbbuffer[__driver_kb_kbbcur] = keyboard_map[(byte)keycode];
 			__driver_kb_kbbcur++;
-			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + useroffset + 1);
 			__std__putc(keyboard_map[(byte)keycode]);
 		}
 		// это для того чтоб при нажатия шифта или капс лока не печатался пробел
@@ -152,7 +148,7 @@ void __driver_kb_keyboard_handler_main(void)
 			__driver_kb_kbbcur--;
 			__std__cursorx--;
 			__driver_kb_kbbuffer[__driver_kb_kbbcur] = '\0';
-			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + 1);
+			__std__cursorPosition((COLUMNS_IN_LINE * __std__cursory) + __driver_kb_kbbcur + useroffset + 1);
 			__std__delete();
 		}
 	}

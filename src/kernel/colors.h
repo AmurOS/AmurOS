@@ -1,4 +1,4 @@
-//colors
+//colors for VGA
 enum colors{
 //black background
  BLACK = 0x00,

@@ -24,54 +24,103 @@ typedef struct {
     byte y_sign: 1;
     byte x_overflow: 1;
     byte y_overflow: 1;
-} __MOUSE_STATUS;
+} MOUSE_STATUS;
 
 int g_mouse_x_pos = 0, g_mouse_y_pos = 0;
-__MOUSE_STATUS g_status;
+MOUSE_STATUS g_status;
 
-int __mouse_getx() {
+/**
+ * read a byte from given port number
+ */
+byte inportb(bit8 port) {
+    byte ret;
+    asm volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+/**
+ * write a given byte to given port number
+ */
+void outportb(bit8 port, byte val) {
+    asm volatile("outb %1, %0" :: "dN"(port), "a"(val));
+}
+
+/**
+ * read 2 bytes(short) from given port number
+ */
+bit8 inports(bit8 port) {
+    bit8 rv;
+    asm volatile ("inw %1, %0" : "=a" (rv) : "dN" (port));
+    return rv;
+}
+
+/**
+ * write given 2 bytes(short) to given port number
+ */
+void outports(bit8 port, bit8 data) {
+    asm volatile ("outw %1, %0" : : "dN" (port), "a" (data));
+}
+
+/**
+ * read 4 bytes(long) from given port number
+ */
+byte32i inportl(bit8 port) {
+    byte32i rv;
+    asm volatile ("inl %%dx, %%eax" : "=a" (rv) : "dN" (port));
+    return rv;
+}
+
+/**
+ * write given 4 bytes(long) to given port number
+ */
+void outportl(bit8 port, byte32i data) {
+    asm volatile ("outl %%eax, %%dx" : : "dN" (port), "a" (data));
+}
+
+
+int mouse_getx() {
     return g_mouse_x_pos;
 }
 
-int __mouse_gety() {
+int mouse_gety() {
     return g_mouse_y_pos;
 }
 
-void __mouse_wait(bool type) {
+void mouse_wait(bool type) {
     byte32i time_out = 100000;
     if (type == false) {
         // suspend until status is 1
         while (time_out--) {
-            if ((read_port(PS2_CMD_PORT) & 1) == 1) {
+            if ((inportb(PS2_CMD_PORT) & 1) == 1) {
                 return;
             }
         }
         return;
     } else {
         while (time_out--) {
-            if ((read_port(PS2_CMD_PORT) & 2) == 0) {
+            if ((inportb(PS2_CMD_PORT) & 2) == 0) {
                 return;
             }
         }
     }
 }
 
-void __mouse_write(byte data) {
+void mouse_write(byte data) {
     // sending write command
-    __mouse_wait(true);
-    write_port(PS2_CMD_PORT, 0xD4);
-    __mouse_wait(true);
+    mouse_wait(true);
+    outportb(PS2_CMD_PORT, 0xD4);
+    mouse_wait(true);
     // finally write data to port
-    write_port(MOUSE_DATA_PORT, data);
+    outportb(MOUSE_DATA_PORT, data);
 }
 
-byte __mouse_read() {
-    __mouse_wait(false);
-    return read_port(MOUSE_DATA_PORT);
+byte mouse_read() {
+    mouse_wait(false);
+    return inportb(MOUSE_DATA_PORT);
 }
 
-void __get_mouse_status(char status_byte, __MOUSE_STATUS *status) {  
-    __std__memset(status, 0, sizeof(__MOUSE_STATUS));
+void get_mouse_status(char status_byte, MOUSE_STATUS *status) {
+    __std__memset(status, 0, sizeof(MOUSE_STATUS));
     if (status_byte & 0x01)
         status->left_button = 1;
     if (status_byte & 0x02)
@@ -90,8 +139,8 @@ void __get_mouse_status(char status_byte, __MOUSE_STATUS *status) {
         status->y_overflow = 1;
 }
 
-void __print_mouse_info() {
-    __std__gotoxy(0,0);
+void print_mouse_info() {
+    __std__gotoxy(0, 0);
     __std__printff("Mouse Demo X: %d, Y: %d\n", g_mouse_x_pos, g_mouse_y_pos);
     if (g_status.left_button) {
         __std__printff("Left button clicked");
@@ -104,22 +153,22 @@ void __print_mouse_info() {
     }
 }
 
-void __mouse_handler(REGISTERS *r) {
+void mouse_handler(REGISTERS *r) {
     static byte mouse_cycle = 0;
     static char mouse_byte[3];
 
     switch (mouse_cycle) {
         case 0:
-            mouse_byte[0] = __mouse_read();
-            __get_mouse_status(mouse_byte[0], &g_status);
+            mouse_byte[0] = mouse_read();
+            get_mouse_status(mouse_byte[0], &g_status);
             mouse_cycle++;
             break;
         case 1:
-            mouse_byte[1] = __mouse_read();
+            mouse_byte[1] = mouse_read();
             mouse_cycle++;
             break;
         case 2:
-            mouse_byte[2] = __mouse_read();
+            mouse_byte[2] = mouse_read();
             g_mouse_x_pos = g_mouse_x_pos + mouse_byte[1];
             g_mouse_y_pos = g_mouse_y_pos - mouse_byte[2];
 
@@ -127,15 +176,15 @@ void __mouse_handler(REGISTERS *r) {
                 g_mouse_x_pos = 0;
             if (g_mouse_y_pos < 0)
                 g_mouse_y_pos = 0;
-            if (g_mouse_x_pos > COLUMNS_IN_LINE)
-                g_mouse_x_pos = COLUMNS_IN_LINE - 1;
-            if (g_mouse_y_pos > LINES)
-                g_mouse_y_pos = LINES - 1;
+            if (g_mouse_x_pos > WIDTHSCREEN)
+                g_mouse_x_pos = WIDTHSCREEN - 1;
+            if (g_mouse_y_pos > HEIGHTSCREEN)
+                g_mouse_y_pos = HEIGHTSCREEN - 1;
 
-            __std__cls();
-            __std__gotoxy(g_mouse_x_pos, g_mouse_y_pos);
-            __std__putc('X');
-            __print_mouse_info();
+           // console_clear(COLOR_WHITE, COLOR_BLACK);
+            //console_gotoxy(g_mouse_x_pos, g_mouse_y_pos);
+            //console_putchar('X');
+            print_mouse_info();
             mouse_cycle = 0;
             break;
     }
@@ -145,17 +194,17 @@ void __mouse_handler(REGISTERS *r) {
 /**
  * available rates 10, 20, 40, 60, 80, 100, 200
  */
-void __set_mouse_rate(byte rate) {
+void set_mouse_rate(byte rate) {
     byte status;
 
-    write_port(MOUSE_DATA_PORT, MOUSE_CMD_SAMPLE_RATE);
-    status = __mouse_read();
+    outportb(MOUSE_DATA_PORT, MOUSE_CMD_SAMPLE_RATE);
+    status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
         __std__printff("error: failed to send mouse sample rate command\n");
         return;
     }
-    write_port(MOUSE_DATA_PORT, rate);
-    status = __mouse_read();
+    outportb(MOUSE_DATA_PORT, rate);
+    status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
         __std__printff("error: failed to send mouse sample rate data\n");
         return;
@@ -168,50 +217,50 @@ void mouse_init() {
     g_mouse_x_pos = 5;
     g_mouse_y_pos = 2;
 
-    __std__printff("initializing mouse...\n");
+    __std__printff("\ninitializing mouse...\n");
 
     // enable mouse device
-    __mouse_wait(true);
-    write_port(PS2_CMD_PORT, 0xA8);
+    mouse_wait(true);
+    outportb(PS2_CMD_PORT, 0xA8);
 
     // print mouse id
-    write_port(MOUSE_DATA_PORT, MOUSE_CMD_MOUSE_ID);
-    status = __mouse_read();
+    outportb(MOUSE_DATA_PORT, MOUSE_CMD_MOUSE_ID);
+    status = mouse_read();
     __std__printff("mouse id: 0x%x\n", status);
 
-    __set_mouse_rate(10);
+    set_mouse_rate(MOUSE_CMD_SAMPLE_RATE);
 
-    //write_port(MOUSE_DATA_PORT, MOUSE_CMD_RESOLUTION);
-    //write_port(MOUSE_DATA_PORT, 0);
+    //outportb(MOUSE_DATA_PORT, MOUSE_CMD_RESOLUTION);
+    //outportb(MOUSE_DATA_PORT, 0);
 
     // enable the interrupt
-    __mouse_wait(true);
-    write_port(PS2_CMD_PORT, 0x20);
-    __mouse_wait(false);
+    mouse_wait(true);
+    outportb(PS2_CMD_PORT, 0x20);
+    mouse_wait(false);
     // get and set second bit
-    status = (read_port(MOUSE_DATA_PORT) | 2);
+    status = (inportb(MOUSE_DATA_PORT) | 2);
     // write status to port
-    __mouse_wait(true);
-    write_port(PS2_CMD_PORT, MOUSE_DATA_PORT);
-    __mouse_wait(true);
-    write_port(MOUSE_DATA_PORT, status);
+    mouse_wait(true);
+    outportb(PS2_CMD_PORT, MOUSE_DATA_PORT);
+    mouse_wait(true);
+    outportb(MOUSE_DATA_PORT, status);
 
     // set mouse to use default settings
-    __mouse_write(MOUSE_CMD_SET_DEFAULTS);
-    status = __mouse_read();
+    mouse_write(MOUSE_CMD_SET_DEFAULTS);
+    status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
         __std__printff("error: failed to set default mouse settings\n");
         return;
     }
 
     // enable packet streaming to receive
-    __mouse_write(MOUSE_CMD_ENABLE_PACKET_STREAMING);
-    status = __mouse_read();
+    mouse_write(MOUSE_CMD_ENABLE_PACKET_STREAMING);
+    status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
         __std__printff("error: failed to enable mouse packet streaming\n");
         return;
     }
 
     // set mouse handler
-    isr_register_interrupt_handler(IRQ_BASE + 12, __mouse_handler);
+    isr_register_interrupt_handler(IRQ_BASE + 12, mouse_handler);
 }

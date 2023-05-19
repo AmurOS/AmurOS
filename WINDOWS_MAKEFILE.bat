@@ -7,9 +7,11 @@
 @move asmlib.o "build"
 @gcc -m32 -c "src\kernel\kernel.c" -o kernelc.o
 @move kernelc.o "build"
+@gcc -m32 -c "src\kernel\os\entry.c" -o os.o
+@move os.o "build"
 @copy link.ld "build"
 @cd "build"
-@ld -T link.ld -m i386pe -o kernel boot.o asmlib.o kernelc.o -build-id=none
+@ld -T link.ld -m i386pe -o kernel boot.o asmlib.o kernelc.o os.o -build-id=none
 @objcopy -O elf32-i386 kernel kernel.elf
 @del link.ld
 @cd ".."

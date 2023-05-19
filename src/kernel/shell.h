@@ -1,5 +1,7 @@
 char *USERNAMENONAMEINAMUROSSHELLSRING = "userok";
 
+extern void entrypoint();
+
 process __boot_process;
 process __shell_process;
 // отстой
@@ -92,6 +94,10 @@ void __shell_cmd_ini(char *str)
         __std__printf("\n= rdfil   testfs          =");
         __std__printf("\n===========================");
     }
+    else if (__shell_cmd_commandcmp(str, "run"))
+    {
+        entrypoint();
+    }
     else if (__shell_cmd_commandcmp(str, "reboot"))
     {
         write_port(0x64, 0xFE);
@@ -182,7 +188,7 @@ void __shell_cmd_ini(char *str)
     {
         __std_music();
     }
-    else if (__shell_cmd_commandcmp(str, "videomode"))
+    /*else if (__shell_cmd_commandcmp(str, "videomode"))
     {
         int ret = __vesa_init(WIDTHSCREEN, HEIGHTSCREEN, 32);
         if (ret < 0)
@@ -205,7 +211,7 @@ void __shell_cmd_ini(char *str)
             __process_push(__desktop_process);
             __start_process(3);
         }
-    }
+    }*/
     else if (__shell_cmd_commandcmp(str, "mkfil "))
     {
         char *string, other;

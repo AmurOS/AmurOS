@@ -188,34 +188,3 @@ int __vesa_init(byte32i width, byte32i height, byte32i bpp)
     return 0;
 }
 
-void __vesa_putpixel(int x, int y, int color)
-{
-    g_vbe_buffer[(y * g_width) + x] = color;
-}
-
-void __vesa_clear(int color)
-{
-    for (int i = 0; i < HEIGHTSCREEN; i++)
-        for (int w = 0; w < WIDTHSCREEN; w++)
-            g_vbe_buffer[i * WIDTHSCREEN + w] = color;
-}
-
-void ppo(byte32i *buffer, byte32i i, unsigned char r, unsigned char g, unsigned char b)
-{
-    buffer[i] = (r << 16) | (g << 8) | b;
-}
-
-void pp(byte32i i, unsigned char r, unsigned char g, unsigned char b)
-{
-    g_vbe_buffer[i] = (r << 16) | (g << 8) | b;
-}
-
-byte32i getp(byte32i i)
-{
-    return g_vbe_buffer[i];
-}
-
-void putp(byte32i i, byte32i color)
-{
-    g_vbe_buffer[i] = color;
-}

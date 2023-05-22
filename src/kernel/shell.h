@@ -220,14 +220,17 @@ void __shell_cmd_ini(char *str)
         char *space = __std__strstr(str, " ");
         WordLen = space - str;
 
-        string = __std__strncpy(string, space[1], sizeof(str) - WordLen);
+        //string = __std__strncpy(string, space[1], sizeof(str) - WordLen);
 
-        char *ispace = __std__strstr(string, " ");
-        ilen = space - str;
+        //char *ispace = __std__strstr(string, " ");
+        //ilen = space - str;
+        __std__printff("\n%s", "Enter file content: ");
+        char *a = __std__scanf("");
 
-        other = __std__strncpy(other, ispace[1], sizeof(string) - ilen);
+        //other = __std__strncpy(other, ispace[1], sizeof(string) - ilen);
 
-        __fs_writefile(__std__strtok(str, " ")[1], sizeof((char *)other) * sizeof(char *), (char *)other);
+        //__fs_writefile(__std__strtok(str, " ")[1], sizeof((char *)other) * sizeof(char *), (char *)other);
+        __fs_writefile("test", sizeof((char *)a) * sizeof(char *), a);
     }
     else if (__shell_cmd_commandcmp(str, "rdfil "))
     {
@@ -286,13 +289,15 @@ void __shell_cmd_ini(char *str)
     {
         __std__printff("\n%d", __std__rand());
     }
-    else if (__shell_cmd_commandcmp(str, "testfs"))
+    else if (__shell_cmd_commandcmp(str, "testfs1"))
     {
         __fs_writefile("test", 4, "abcd");
+        __fs_writefile("test", 4, "efgk");
+    }
+    else if (__shell_cmd_commandcmp(str, "testfs2"))
+    {
         __std__printf("\n");
         __std__printf(__fs_readfile("test"));
-        //__fs_readfile("test");
-        __fs_writefile("test", 4, "efgk");
         __std__printf("\n");
         __std__printf(__fs_readfile("test"));
     }
@@ -326,3 +331,4 @@ void __shell_cmd_ini(char *str)
         __vesa_vbe_print_available_modes();
     }
 }
+

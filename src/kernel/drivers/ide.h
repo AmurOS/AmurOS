@@ -86,15 +86,35 @@ struct IDEChannelRegisters {
    unsigned char nIEN;  // nIEN (No Interrupt);
 } channels[2];
 
+unsigned char package[2048] = {0};
 unsigned char ide_buf[2048] = {0};
 volatile unsigned static char ide_irq_invoked = 0;
 unsigned static char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+void ide_wait_irq() {
+   while (!ide_irq_invoked)
+      ;
+   ide_irq_invoked = 0;
+}
+
+void ide_irq() {
+   ide_irq_invoked = 1;
+}
+
+void insl(unsigned char reg, unsigned int *buffer, unsigned int quads)
+{
+    int index;
+    for(index = 0; index < quads; index++)
+    {
+        buffer[index] = read_port(reg);
+    }
+}
 
 struct ide_device {
    unsigned char Reserved;    // 0 (Empty) or 1 (This Drive really exists).
    unsigned char Channel;     
    unsigned char Drive;
-    // 0 (Primary Channel) or 1 (Secondary Channel).unsignedchar Drive;       // 0 (Master Drive) or 1 (Slave Drive).
+   unsigned char Base; // 0 (Primary Channel) or 1 (Secondary Channel).unsignedchar Drive;       // 0 (Master Drive) or 1 (Slave Drive).
    unsigned short Type;        // 0: ATA, 1:ATAPI.
    unsigned short Signature;   // Drive Signature
    unsigned short Capabilities;// Features.
@@ -135,7 +155,7 @@ void ide_write(unsigned char channel, unsigned char reg, unsigned char data) {
       ide_write(channel, ATA_REG_CONTROL, channels[channel].nIEN);
 }
 
-void ide_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer,
+void ide_read_buffer(unsigned char channel, unsigned char reg, unsigned int *buffer,
                      unsigned int quads) {
    /* WARNING: This code contains a serious bug. The inline assembly trashes ES and
     *           ESP for all of the code the compiler generates between the inline
@@ -471,3 +491,104 @@ unsigned char ide_ata_access(unsigned char direction, unsigned char drive, unsig
     return 0; // Easy, isn't it?
 }
 
+unsigned char ide_atapi_read(unsigned char drive, unsigned int lba, unsigned char numsects,
+          unsigned short selector, unsigned int edi) {
+   unsigned int   channel  = ide_devices[drive].Channel;
+   unsigned int   slavebit = ide_devices[drive].Drive;
+   unsigned int   bus      = channels[channel].base;
+   unsigned int   words    = 1024; // Sector Size. ATAPI drives have a sector size of 2048 bytes.
+   unsigned char  err;
+   int i;
+
+   ide_write(channel, ATA_REG_CONTROL, channels[channel].nIEN = ide_irq_invoked = 0x0);
+
+   atapi_packet[ 0] = ATAPI_CMD_READ;
+   atapi_packet[ 1] = 0x0;
+   atapi_packet[ 2] = (lba >> 24) & 0xFF;
+   atapi_packet[ 3] = (lba >> 16) & 0xFF;
+   atapi_packet[ 4] = (lba >> 8) & 0xFF;
+   atapi_packet[ 5] = (lba >> 0) & 0xFF;
+   atapi_packet[ 6] = 0x0;
+   atapi_packet[ 7] = 0x0;
+   atapi_packet[ 8] = 0x0;
+   atapi_packet[ 9] = numsects;
+   atapi_packet[10] = 0x0;
+   atapi_packet[11] = 0x0;
+
+   ide_write(channel, ATA_REG_HDDEVSEL, slavebit << 4);
+
+   for(int i = 0; i < 4; i++)
+       ide_read(channel, ATA_REG_ALTSTATUS); 
+
+   ide_write(channel, ATA_REG_LBA1, (words * 2) & 0xFF);   // Lower Byte of Sector Size.
+   ide_write(channel, ATA_REG_LBA2, (words * 2) >> 8);
+
+   ide_write(channel, ATA_REG_COMMAND, ATA_CMD_PACKET);      // Send the Command.
+ 
+   // (VII): Waiting for the driver to finish or return an error code:
+   // ------------------------------------------------------------------
+   if (err = ide_polling(channel, 1)) return err;         // Polling and return if error.
+ 
+   // (VIII): Sending the packet data:
+   // ------------------------------------------------------------------
+   asm("rep   outsw" : : "c"(6), "d"(bus), "S"(atapi_packet)); 
+
+   for (i = 0; i < numsects; i++) {
+      ide_wait_irq();                  // Wait for an IRQ.
+      if (err = ide_polling(channel, 1))
+         return err;      // Polling and return if error.
+      asm("pushw %es");
+      asm("mov %%ax, %%es"::"a"(selector));
+      asm("rep insw"::"c"(words), "d"(bus), "D"(edi));// Receive Data.
+      asm("popw %es");
+      edi += (words * 2);
+   }
+
+   ide_wait_irq();
+ 
+   // (XI): Waiting for BSY & DRQ to clear:
+   // ------------------------------------------------------------------
+   while (ide_read(channel, ATA_REG_STATUS) & (ATA_SR_BSY | ATA_SR_DRQ))
+      ;
+ 
+   return 0; // Easy, ... Isn't it?
+}
+
+void ide_write_sectors(unsigned char drive, unsigned char numsects, unsigned int lba,unsigned short es, unsigned int edi) {
+
+   if (drive > 3 || ide_devices[drive].Reserved == 0)
+      package[0] = 0x1;
+   else if (((lba + numsects) > ide_devices[drive].Size) && (ide_devices[drive].Type == IDE_ATA))
+      package[0] = 0x2;
+   else {
+      unsigned char err;
+      if (ide_devices[drive].Type == IDE_ATA)
+         err = ide_ata_access(ATA_WRITE, drive, lba, numsects, es, edi);
+      else if (ide_devices[drive].Type == IDE_ATAPI)
+         err = 4; // Write-Protected.
+      package[0] = ide_print_error(drive, err);
+   }
+}
+
+void ide_read_sectors(unsigned char drive, unsigned char numsects, unsigned int lba,
+                      unsigned short es, unsigned int edi) {
+ 
+   // 1: Check if the drive presents:
+   // ==================================
+   if (drive > 3 || ide_devices[drive].Reserved == 0) package[0] = 0x1;      // Drive Not Found!
+ 
+   // 2: Check if inputs are valid:
+   // ==================================
+   else if (((lba + numsects) > ide_devices[drive].Size) && (ide_devices[drive].Type == IDE_ATA))
+      package[0] = 0x2;                   
+ 
+   else {
+      unsigned char err;
+      if (ide_devices[drive].Type == IDE_ATA)
+         err = ide_ata_access(ATA_READ, drive, lba, numsects, es, edi);
+      else if (ide_devices[drive].Type == IDE_ATAPI)
+         for (int i = 0; i < numsects; i++)
+            err = ide_atapi_read(drive, lba + i, 1, es, edi + (i*2048));
+      package[0] = ide_print_error(drive, err);
+   }
+}

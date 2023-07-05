@@ -1,6 +1,14 @@
 #define MAX_WORDS 1000
 #define MAX_WORD_LEN 1000
 
+#define foreach(item, array) \
+    for(int keep = 1, \
+            count = 0,\
+            size = sizeof (array) / sizeof *(array); \
+        keep && count != size; \
+        keep = !keep, count++) \
+      for(item = (array) + count; keep; keep = !keep)
+
 char *__std__vidmem = (char *)0xb8000;
 
 int __std__strlen(const char *str);
@@ -98,7 +106,7 @@ void __std__cursorPos(byte x, byte y)
 	write_port(DATA_PORT, cursorLocation);
 }
 
-static void *__std__malloc(unsigned int sz)
+void *__std__malloc(unsigned int sz)
 {
 	void *mem;
 	if (sizeof __std__buffmem - __std__next_index < sz)
@@ -108,7 +116,7 @@ static void *__std__malloc(unsigned int sz)
 	return mem;
 }
 
-static void __std__free(void **ptr)
+void __std__free(void **ptr)
 {
 	*ptr = __std__malloc(0);
 }

@@ -289,6 +289,12 @@ void __shell_cmd_ini(char *str)
     {
         __std__printff("\n%d", __std__rand());
     }
+    else if (__shell_cmd_commandcmp(str, "execute"))
+    {
+        __compiler_start();
+        __std__cls();
+        __shell_offset();
+    }
     else if (__shell_cmd_commandcmp(str, "testfs1"))
     {
         __fs_writefile("test", 4, "abcd");

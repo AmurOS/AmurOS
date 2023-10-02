@@ -1,13 +1,13 @@
 #define MAX_WORDS 1000
 #define MAX_WORD_LEN 1000
 
-#define foreach(item, array) \
-    for(int keep = 1, \
-            count = 0,\
-            size = sizeof (array) / sizeof *(array); \
-        keep && count != size; \
-        keep = !keep, count++) \
-      for(item = (array) + count; keep; keep = !keep)
+#define foreach(item, array)                         \
+	for (int keep = 1,                               \
+			 count = 0,                              \
+			 size = sizeof(array) / sizeof *(array); \
+		 keep && count != size;                      \
+		 keep = !keep, count++)                      \
+		for (item = (array) + count; keep; keep = !keep)
 
 char *__std__vidmem = (char *)0xb8000;
 
@@ -482,12 +482,37 @@ char **__std__strsplit(char *str, const char *tok)
 	return words;
 }
 
+void clear_line(unsigned char *p)
+{
+	int i;
+	unsigned char attr = 0x07;
+	for (i = 0; i < COLUMNS_IN_LINE; i++)
+	{
+		*p++ = ' ';
+		*p++ = attr;
+	}
+}
+
+void __std__scroll_up()
+{
+	__std__memcpy(__std__vidmem, __std__vidmem + (COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT), SCREENSIZE - (COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT));
+	clear_line(__std__vidmem + SCREENSIZE - (COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT));
+}
+
 void __std__newline()
 {
-	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
-	__std__cursory++;
-	__std__cursorx = 0;
-	i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+	if (__std__cursory >= LINES - 1)
+	{
+		__std__scroll_up();
+		__std__cursorx = 0;
+	}
+	else
+	{
+		unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
+		__std__cursory++;
+		__std__cursorx = 0;
+		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+	}
 }
 
 void __std__putc(char ch)
@@ -495,9 +520,7 @@ void __std__putc(char ch)
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
 	if (ch == '\n')
 	{
-		__std__cursory++;
-		__std__cursorx = 0;
-		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);
+		__std__newline();
 		return;
 	}
 	__std__vidmem[i] = ch;
@@ -511,6 +534,7 @@ void __std__putcc(char ch, enum colors color)
 	unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
 	if (ch == '\n')
 	{
+		unsigned int i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT) + __std__cursorx;
 		__std__cursory++;
 		__std__cursorx = 0;
 		i = (__std__cursory * COLUMNS_IN_LINE * BYTES_FOR_EACH_ELEMENT);

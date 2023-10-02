@@ -29,55 +29,6 @@ typedef struct {
 int g_mouse_x_pos = 0, g_mouse_y_pos = 0;
 MOUSE_STATUS g_status;
 
-/**
- * read a byte from given port number
- */
-byte inportb(bit8 port) {
-    byte ret;
-    asm volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
-}
-
-/**
- * write a given byte to given port number
- */
-void outportb(bit8 port, byte val) {
-    asm volatile("outb %1, %0" :: "dN"(port), "a"(val));
-}
-
-/**
- * read 2 bytes(short) from given port number
- */
-bit8 inports(bit8 port) {
-    bit8 rv;
-    asm volatile ("inw %1, %0" : "=a" (rv) : "dN" (port));
-    return rv;
-}
-
-/**
- * write given 2 bytes(short) to given port number
- */
-void outports(bit8 port, bit8 data) {
-    asm volatile ("outw %1, %0" : : "dN" (port), "a" (data));
-}
-
-/**
- * read 4 bytes(long) from given port number
- */
-byte32i inportl(bit8 port) {
-    byte32i rv;
-    asm volatile ("inl %%dx, %%eax" : "=a" (rv) : "dN" (port));
-    return rv;
-}
-
-/**
- * write given 4 bytes(long) to given port number
- */
-void outportl(bit8 port, byte32i data) {
-    asm volatile ("outl %%eax, %%dx" : : "dN" (port), "a" (data));
-}
-
-
 int mouse_getx() {
     return g_mouse_x_pos;
 }
@@ -140,7 +91,7 @@ void get_mouse_status(char status_byte, MOUSE_STATUS *status) {
 }
 
 void print_mouse_info() {
-    __std__gotoxy(0, 0);
+    //console_gotoxy(0, 0);
     __std__printff("Mouse Demo X: %d, Y: %d\n", g_mouse_x_pos, g_mouse_y_pos);
     if (g_status.left_button) {
         __std__printff("Left button clicked");
@@ -176,12 +127,12 @@ void mouse_handler(REGISTERS *r) {
                 g_mouse_x_pos = 0;
             if (g_mouse_y_pos < 0)
                 g_mouse_y_pos = 0;
-            if (g_mouse_x_pos > WIDTHSCREEN)
-                g_mouse_x_pos = WIDTHSCREEN - 1;
-            if (g_mouse_y_pos > HEIGHTSCREEN)
-                g_mouse_y_pos = HEIGHTSCREEN - 1;
+            if (g_mouse_x_pos > VGA_MAX_WIDTH)
+                g_mouse_x_pos = VGA_MAX_WIDTH - 1;
+            if (g_mouse_y_pos > VGA_MAX_HEIGHT)
+                g_mouse_y_pos = VGA_MAX_HEIGHT - 1;
 
-           // console_clear(COLOR_WHITE, COLOR_BLACK);
+            //console_clear(COLOR_WHITE, COLOR_BLACK);
             //console_gotoxy(g_mouse_x_pos, g_mouse_y_pos);
             //console_putchar('X');
             print_mouse_info();
@@ -200,13 +151,13 @@ void set_mouse_rate(byte rate) {
     outportb(MOUSE_DATA_PORT, MOUSE_CMD_SAMPLE_RATE);
     status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
-        __std__printff("error: failed to send mouse sample rate command\n");
+        __sh_error("failed to send mouse sample rate command\n");
         return;
     }
     outportb(MOUSE_DATA_PORT, rate);
     status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
-        __std__printff("error: failed to send mouse sample rate data\n");
+        __sh_error("failed to send mouse sample rate data\n");
         return;
     }
 }
@@ -217,7 +168,7 @@ void mouse_init() {
     g_mouse_x_pos = 5;
     g_mouse_y_pos = 2;
 
-    __std__printff("\ninitializing mouse...\n");
+    __std__printff("initializing mouse...\n");
 
     // enable mouse device
     mouse_wait(true);
@@ -228,7 +179,7 @@ void mouse_init() {
     status = mouse_read();
     __std__printff("mouse id: 0x%x\n", status);
 
-    set_mouse_rate(MOUSE_CMD_SAMPLE_RATE);
+    set_mouse_rate(10);
 
     //outportb(MOUSE_DATA_PORT, MOUSE_CMD_RESOLUTION);
     //outportb(MOUSE_DATA_PORT, 0);
@@ -249,7 +200,7 @@ void mouse_init() {
     mouse_write(MOUSE_CMD_SET_DEFAULTS);
     status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
-        __std__printff("error: failed to set default mouse settings\n");
+        __sh_error("failed to set default mouse settings\n");
         return;
     }
 
@@ -257,7 +208,7 @@ void mouse_init() {
     mouse_write(MOUSE_CMD_ENABLE_PACKET_STREAMING);
     status = mouse_read();
     if(status != MOUSE_ACKNOWLEDGE) {
-        __std__printff("error: failed to enable mouse packet streaming\n");
+        __sh_error("failed to enable mouse packet streaming\n");
         return;
     }
 

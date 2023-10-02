@@ -58,6 +58,7 @@ void clear_list() {
 void __compiler_start() {
     __std__cls();
     __driver_kb_kbbcur = 0;
+    useroffset = 0;
     __std__gotoxy(0, 0);
     __std__printf("AmurOS BVE 1.0\n\n");
 
@@ -65,7 +66,7 @@ void __compiler_start() {
         __std__printf("\n> ");
         char *command = "";
         __std__scanf(command);
-        if (__shell_cmd_commandcmp(command, "add ")) {
+        if (__std__strcmp(command, "add ")) {
             char *line = __std__strsplit(command, " ")[1];
             int len = (sizeof((char *)line) * sizeof(char *))/2;
             commands[pointer] = hexstr_to_char(line);
@@ -76,25 +77,25 @@ void __compiler_start() {
             pointer++;
             commands[pointer] = NULL;
         }
-        else if (__shell_cmd_commandcmp(command, "run")) {
+        else if (__std__strcmp(command, "run")) {
             //TODO: СДЕЛАТЬ ЭТО
             //__std__printf(commands[pointer-1]);
             __std__cls();
             __compiler_execute(commands[pointer-1]);
             __driver_kb_kbbcur = 0;
-             __std__gotoxy(0, 0);
+            __std__gotoxy(0, 0);
         }
-        else if (__shell_cmd_commandcmp(command, "exit")) {
+        else if (__std__strcmp(command, "exit")) {
             break;
         }
-        else if (__shell_cmd_commandcmp(command, "list")) {
+        else if (__std__strcmp(command, "list")) {
             __std__newline();
             for (int i = 0; i < pointer; i++) {
                 print_command(commands[i]);
                 __std__newline();
             }
         }
-        else if (__shell_cmd_commandcmp(command, "clear")) {
+        else if (__std__strcmp(command, "clear")) {
             clear_list();
         }
     }

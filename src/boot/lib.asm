@@ -550,6 +550,62 @@ current_esp:
 _BIOS32_END:
 
 
+
+;-------------------------------------------------
+;	Interrupt Service Routinen (teils ausgeliehen)
+;-------------------------------------------------
+
+; I shouldn't have to do this!
+%macro PUSHB 1
+	db 6Ah
+	db %1
+%endmacro
+
+	
+; $$$ CONTEXT SWITCHING + SOFTWARE MULTITASKING $$$
+global _contextswitch
+_contextswitch:
+	pusha	; 32 byte push
+	mov	eax, [esp+36]
+	mov	[eax], esp
+	mov	esp, [esp+40] ; $$$
+	popa
+	ret
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; name:			getvect
+; action:		reads interrupt vector
+; in:			[EBP + 12] = vector number
+; out:			vector stored at address given by [EBP + 8]
+; modifies:		EAX, EDX
+; minimum CPU:		'386+
+; notes:		C prototype:
+;			typedef struct
+;			{	unsigned access_byte, eip; } vector_t;
+;			getvect(vector_t *v, unsigned vect_num);
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+global _getvect
+_getvect:
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; name:			setvect
+; action:		writes interrupt vector
+; in:			[EBP + 12] = vector number,
+;			vector stored at address given by [EBP + 8]
+; out:			(nothing)
+; modifies:		EAX, EDX
+; minimum CPU:		'386+
+; notes:		C prototype:
+;			typedef struct
+;			{	unsigned access_byte, eip; } vector_t;
+;			getvect(vector_t *v, unsigned vect_num);
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+global _setvect
+_setvect:
+
 section .bss
 resb 8192; 8KB for stack
 stack_space:

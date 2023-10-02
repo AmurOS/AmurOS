@@ -3,12 +3,14 @@
 #define TOP 0
 #define BOTTOM HEIGHTSCREEN
 
-#define HEIGHTTASKBAR 45
+#define __vesa_VBE_RGB(r, g, b) __vesa_vbe_rgb(r, g, b)
+
+#define HEIGHTTASKBAR 35
 #define BITMAP_SIZE 8
 
 #define HEIGHTBORDERTOP 15
-#define BASEBORDER 5
-#define CORNERRADIUS 5
+#define BASEBORDER 2
+#define CORNERRADIUS 0
 #define MAINCOLOR __vesa_VBE_RGB(51,51,51)
 
 #define MULTIBOOT_MAGIC_HEADER 0x1BADB002
@@ -44,12 +46,27 @@
 #define ENTER_KEY_CODE 0x1C
 #define BACKSPACE_KEY_CODE 0x0E
 #define TAB_KEY_CODE 0x0F
+// available modes: 320×200	640×400	640×480	800×500	800×600	896×672	1024×640 1024×768 1152×720 1280×1024 1360×768 1440×900 1600×1200
+#define WIDTHSCREEN 800
+#define HEIGHTSCREEN 600
 
-#define WIDTHSCREEN 1440
-#define HEIGHTSCREEN 900
+#define PAGE_SIZE 0x1000
 
 extern void gdt_init();
 extern void idt_init();
+extern void mouse_init();
+extern int mouse_getx();
+extern int mouse_gety();
+extern void outportb(unsigned port, unsigned val);
+extern unsigned inportb(unsigned port);
+extern void outb(unsigned short port, unsigned char value);
+extern byte inb(bit8 port);
+extern void map_all();
+extern void phys_free(byte32 addr);
+extern void enable_paging();
+extern void kinit();
+extern void init_multitasking();
+extern void ProcessCreate(void (*entry)(void), char *process_name);
 
 typedef struct process{
 	int id;
@@ -68,6 +85,30 @@ typedef struct __plasmaUI_Button
     int cornerRadius;
 } __plasmaUI_Button;
 
+typedef struct __plasmaUI_ProgressBar{
+    int num;
+    int max: 10;
+    int x;
+    int y;
+    int width;
+    int height;
+    int color;
+    int background;
+    int cornerRadius;
+} __plasmaUI_ProgressBar;
+
+typedef struct __plasmaUI_ListBox
+{
+    int items;
+    int x;
+    int y;
+    int width;
+    int height;
+    int color;
+    int background;
+    int cornerRadius;
+} __plasmaUI_ListBox;
+
 typedef struct __plasmaUI_windowINI
 {
     int positionX;
@@ -80,13 +121,28 @@ typedef struct __plasmaUI_windowINI
     void *(func);
 } __desktop_windowINI;
 
+typedef struct
+{
+	unsigned access_byte, eip;
+} vector_t;
+
 extern void __plasmaUI_CreateButton(__plasmaUI_Button button);
+extern void __plasmaUI_CreateProgressBar(__plasmaUI_ProgressBar bar);
+extern void __plasmaUI_CreateListBox(__plasmaUI_ListBox box);
 extern void __plasmaUI_drawNumbitmaps(int index, int x, int y, int color);
 extern void __plasmaUI_drawAlphabitmaps(int index, int x, int y, int color);
 extern void __plasmaUI_drawChar(int x, int y, int color, char ch);
 extern void __plasmaUI_drawString(int x, int y, int color, char *str, int size);
 extern void __plasmaUI_CreateWindow(__desktop_windowINI window);
 extern void __plasmaUI_MessageBox(char *title, char *message);
+extern void intr_fault_pf(long esp, long error_code);
+extern void intr_fault_gpf(long esp, long error_code);
+extern void intr_fault_stack(long esp, long error_code);
+extern void intr_fault_segment(long esp, long error_code);
+extern void intr_fault_tss(long esp, long error_code);
+extern void intr_fault_opcode(long esp, long error_code);
+extern void intr_fault_bound(long esp, long error_code);
+extern void intr_fault_divide(long esp, long error_code);
 
 #include "libs/cmos.h"
 #include "libs/std.h"
@@ -171,9 +227,3 @@ extern void __desktop_toolbar();
 extern void __desktop_init();
 extern void __desktop_splashscreen();*/
 
-#define RIGHT WIDTHSCREEN
-#define LEFT 0
-#define TOP 0
-#define BOTTOM HEIGHTSCREEN
-#define __vesa_VBE_RGB(r, g, b) __vesa_vbe_rgb(r, g, b)
-#define HEIGHTTASKBAR 45

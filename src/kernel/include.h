@@ -11,19 +11,68 @@ int useroffset = 1;
 /////////////////////////
 void keyboard_handler(void);
 void pixel(void);
+
 char read_port(bit8 port);
 void write_port(bit8 port, byte data);
-void outw(unsigned short port, unsigned short value) {
-asm volatile ("outw %%ax,%%dx": :"dN"(port), "a"(value));
+unsigned long inl(unsigned short port) { unsigned long ret;
+     __asm__ __volatile__("in%L0 (%1)" : "=a" (ret) : "d" (port)); return ret; }
+void outl(unsigned short port, unsigned long value) {
+     __asm__ __volatile__("out%L0 (%1)" : :"a" (value), "d" (port)); }   
+unsigned short inw (unsigned short int port)
+{
+  unsigned short _v;
+
+  __asm__ __volatile__ ("inw %w1,%0":"=a" (_v):"Nd" (port));
+  return _v;
 }
-void outb(unsigned short port, unsigned char value) {
-asm volatile ("outb %%al,%%dx": :"dN"(port), "a"(value));
+void outw(unsigned short port, unsigned short value)
+{
+    __asm__ __volatile__("outw %%ax, %%dx" : : "d" (port), "a" (value));
+} 
+void outportl(unsigned short port, unsigned long value) {
+     __asm__ __volatile__("out%L0 (%1)" : :"a" (value), "d" (port)); }
+unsigned short inportw (unsigned short int port)
+{
+  unsigned short _v;
+
+  __asm__ __volatile__ ("inw %w1,%0":"=a" (_v):"Nd" (port));
+  return _v;
 }
-byte inb(bit8 port) {
-    byte ret;
-    asm volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
+void outportw(unsigned short port, unsigned short value)
+{
+    __asm__ __volatile__("outw %%ax, %%dx" : : "d" (port), "a" (value));
 }
+void outb(unsigned port, unsigned val)
+{
+	__asm__ __volatile__("outb %b0,%w1"
+		:
+		: "a"(val), "d"(port));
+}
+unsigned inb(unsigned port)
+{
+	unsigned ret_val;
+
+	__asm__ __volatile__("inb %w1,%b0"
+		: "=a"(ret_val)
+		: "d"(port));
+	return ret_val;
+}
+void outportb(unsigned port, unsigned val)
+{
+	__asm__ __volatile__("outb %b0,%w1"
+		:
+		: "a"(val), "d"(port));
+}
+unsigned inportb(unsigned port)
+{
+	unsigned ret_val;
+
+	__asm__ __volatile__("inb %w1,%b0"
+		: "=a"(ret_val)
+		: "d"(port));
+	return ret_val;
+}
+
 
 void load_idt(byte32 *idt_ptr);
 void reboot(void);
@@ -46,16 +95,22 @@ void __std__delete();
 #include "gdt.h"
 #include "isr.h"
 #include "idt.h"
+#include "physalloc.h"
+#include "paging.h"
 #include "8259_pic.h"
 #include "bios32.h"
 //#include "multitasking.h"
 #include "drivers/cmos_clock.h"
 #include "promtssh.h"
 #include "drivers/vesa.h"
-//#include "AGE/graphic/jerboa.h"
+#include "interrupts.h"
+#include "kalloc.h"
+#include "task.h"
 #include "drivers/fs.h"
 #include "drivers/ide.h"
 #include "drivers/atapi.h"
+#include "fs/fat32.h"
+#include "fs/file.h"
 #include "process.h"
 #include "drivers/mouse.h"
 #include "AGE/plasmaUI.h"

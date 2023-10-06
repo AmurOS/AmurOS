@@ -12,6 +12,8 @@ typedef struct __plasmaUI_windowINI
     void *(func);
 } __desktop_windowINI;
 
+
+
 void __plasmaUI_CreateWindow(__desktop_windowINI window)
 {
     __desktop_windowINI win;
@@ -21,25 +23,25 @@ void __plasmaUI_CreateWindow(__desktop_windowINI window)
     window.cornRadius = CORNERRADIUS;
     window.color = __vesa_VBE_RGB(200, 200, 200);
     __plasmaUI_Button close;
-    close.cornerRadius = 3;
+    close.cornerRadius = 0;
     close.color = __vesa_VBE_RGB(255, 255, 255);
     close.background = __vesa_VBE_RGB(36,36,36);
     close.width = 20 - 2;
     close.height = HEIGHTBORDERTOP - 3;
     close.str = "x";
 
-    close.x = window.positionX + window.width - BASEBORDER * 2 - 12;
-    close.y = window.positionY + 1;
+    close.x = window.positionX + window.width - BASEBORDER * 4 - 10;
+    close.y = window.positionY;
 
-    __vesa_Rect(window.positionX, window.positionY, window.width, window.height, MAINCOLOR);
-    __plasmaUI_drawString(window.positionX + window.width/2 - __std__strlen(window.title)*2 - close.width, window.positionY + (HEIGHTBORDERTOP / 2 - 4), __vesa_VBE_RGB(255, 255, 255), window.title, __std__strlen(window.title));
+    __vesa_RectR(window.positionX, window.positionY, window.width, window.height,window.cornRadius, MAINCOLOR);
+    __plasmaUI_drawString(window.positionX + BASEBORDER, window.positionY + (HEIGHTBORDERTOP / 2 - 4), __vesa_VBE_RGB(255, 255, 255), window.title, __std__strlen(window.title));
     __plasmaUI_CreateButton(close);
     // window control in window
     // base
-    __vesa_Rect(window.positionX + BASEBORDER - 1, window.positionY + HEIGHTBORDERTOP+2, window.width - BASEBORDER * 2 + 2, window.height - HEIGHTBORDERTOP - BASEBORDER - 2, window.color);
+    __vesa_Rect(window.positionX + BASEBORDER, window.positionY + HEIGHTBORDERTOP, window.width - BASEBORDER * 2, window.height - HEIGHTBORDERTOP - BASEBORDER, window.color);
 }
 
-void __plasmaUI_MessageBox(char *title, char *message)
+void* __plasmaUI_MessageBox(char *title, char *message)
 {
     __desktop_windowINI window;
     window.cornRadius = 2;

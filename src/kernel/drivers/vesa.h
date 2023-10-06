@@ -219,3 +219,7 @@ void putp(byte32i i, byte32i color)
 {
     g_vbe_buffer[i] = color;
 }
+
+unsigned long *getlfb() {
+	return g_vbe_buffer;	
+}

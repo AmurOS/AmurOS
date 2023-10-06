@@ -1,9 +1,9 @@
 #define BITMAP_SIZE 8
 
 #define HEIGHTBORDERTOP 15
-#define BASEBORDER 5
-#define CORNERRADIUS 5
-#define MAINCOLOR __vesa_VBE_RGB(51,51,51)
+#define BASEBORDER 2
+#define CORNERRADIUS 0
+#define MAINCOLOR __vesa_VBE_RGB(51, 51, 51)
 
 typedef struct __plasmaUI_Button
 {
@@ -17,6 +17,43 @@ typedef struct __plasmaUI_Button
     int cornerRadius;
 } __plasmaUI_Button;
 
+typedef struct __plasmaUI_Item
+{
+    int x;
+    int y;
+    int width;
+    int height;
+    int color;
+    int background;
+    char *str;
+    int cornerRadius;
+} __plasmaUI_Item;
+
+typedef struct __plasmaUI_ProgressBar
+{
+    int num;
+    int max : 10;
+    int x;
+    int y;
+    int width;
+    int height;
+    int color;
+    int background;
+    int cornerRadius;
+} __plasmaUI_ProgressBar;
+
+typedef struct __plasmaUI_ListBox
+{
+    int items;
+    int x;
+    int y;
+    int width;
+    int height;
+    int color;
+    int background;
+    int cornerRadius;
+} __plasmaUI_ListBox;
+
 void __plasmaUI_CreateButton(__plasmaUI_Button button)
 {
     __vesa_RectR(button.x, button.y, button.width, button.height, button.cornerRadius, button.background);
@@ -24,6 +61,43 @@ void __plasmaUI_CreateButton(__plasmaUI_Button button)
         __plasmaUI_drawString(button.x + (button.width - (__std__strlen(button.str) * BITMAP_SIZE)) / 2, button.y + (button.height / 2 - 4), button.color, button.str, __std__strlen(button.str));
 }
 
+void __plasmaUI_CreateProgressBar(__plasmaUI_ProgressBar bar)
+{
+    __vesa_RectR(bar.x, bar.y, bar.width, bar.height, bar.cornerRadius, bar.background);
+    for (int i = 0; i <= bar.num; i++)
+    {
+        if (i <= 0)
+            ;
+        else
+            __vesa_RectR(bar.x, bar.y, i * bar.width / 100, bar.height, bar.cornerRadius, bar.color);
+
+        if (i == bar.max)
+            break;
+        else
+            i++;
+    }
+}
+
+void __plasmaUI_CreateListBox(__plasmaUI_ListBox box)
+{
+    __plasmaUI_Item item;
+    item.width = box.width - 4;
+    item.height = 10;
+    item.color = __vesa_VBE_RGB(78, 78, 78);
+    __vesa_RectR(box.x, box.y, box.width, box.height, 0, box.background);
+    for (int i = 0; i < box.items; i++)
+    {
+
+        if (box.y + i * (item.height + 2) + 2 == box.height)
+            __vesa_RectR(box.x + 2, box.y + i * (item.height + 2) + 2, item.width, item.height, 0, item.color);
+        else
+            break;
+    }
+}
+
+void __plasmaUI_CreateVScroll()
+{
+}
 
 // draw string and font
 byte bitmaps_0_9[10][BITMAP_SIZE] = {
